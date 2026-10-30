@@ -1,4 +1,4 @@
-/* Pixel the Siamese — free-roaming cat brain.
+/* Pororo the Siamese — free-roaming cat brain.
    He roams the WHOLE house from the very start: wanders, pauses, naps,
    hops up on his couch perch, and — importantly — physically WALKS to a
    door, passes through it, and comes out the other side. No teleporting.
@@ -41,7 +41,7 @@ export interface CatState {
   doorFade: number;
 }
 
-/** Couch perch (foot anchor) in the living room — Pixel's favourite spot. */
+/** Couch perch (foot anchor) in the living room — Pororo's favourite spot. */
 export const CAT_COUCH = { x: 168, y: 83 };
 /** Floor point directly in front of the couch, used to hop on/off. */
 const COUCH_FLOOR = { x: 170, y: 130 };

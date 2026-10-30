@@ -5,6 +5,7 @@ import { ROOMS } from "../game/rooms";
 import { usePhTime, cycleTimeMode } from "../game/phTime";
 import { sfx } from "../game/sound";
 import { PixelSprite } from "./PixelSprite";
+import { WeatherBadge } from "./WeatherBadge";
 
 function RooftopBackdrop() {
   const ref = useRef<HTMLCanvasElement>(null);
@@ -73,12 +74,14 @@ export function TitleScreen({ onStart, onInfo }: { onStart: () => void; onInfo: 
 
         <h1 className="neon-sign text-[28px] sm:text-5xl md:text-6xl mt-5 leading-none whitespace-nowrap">cipher chris</h1>
         <p className="font-pixel text-[9px] sm:text-xs text-bone mt-5 leading-relaxed" style={{ textShadow: "2px 2px 0 #000" }}>
-          A POINT &amp; CLICK PORTFOLIO ADVENTURE
+          AN INTERACTIVE PORTFOLIO WALKTHROUGH
         </p>
         <p className="font-term text-xl sm:text-2xl text-bone/90 mt-2 max-w-[580px] leading-tight" style={{ textShadow: "2px 2px 0 #000" }}>
           Step inside Cipher Chris's house — synced live to <span className="text-amber-neon">Philippine time ({pht.formatted})</span>.
-          Find the USB. Bribe the cat. Ship the secret project.
+          Explore the rooms, meet Pororo, and discover my work.
         </p>
+
+        <div className="mt-3"><WeatherBadge /></div>
 
         <div className="flex items-end gap-6 mt-7">
           <div className="floaty"><PixelSprite name="charIdle" scale={3} /></div>
@@ -90,7 +93,7 @@ export function TitleScreen({ onStart, onInfo }: { onStart: () => void; onInfo: 
           onClick={start}
           className="pix-btn pix-btn-green mt-8 px-8 py-4 text-xs sm:text-sm flex items-center gap-3"
         >
-          <Play size={16} /> <span className="pix-blink">PRESS START</span>
+          <Play size={16} /> <span className="pix-blink">EXPLORE THE HOUSE</span>
         </button>
         <p className="font-term text-dim text-lg mt-2" style={{ textShadow: "1px 1px 0 #000" }}>
           sound on for full chiptune glory ♪ · click clock above to test Day / Sunset / Night
@@ -98,13 +101,13 @@ export function TitleScreen({ onStart, onInfo }: { onStart: () => void; onInfo: 
 
         <div className="flex flex-wrap justify-center gap-x-6 gap-y-2 mt-7 font-term text-lg text-bone/85" style={{ textShadow: "2px 2px 0 #000" }}>
           <span className="flex items-center gap-1.5"><MousePointerClick size={15} className="text-cyan-neon" /> click to walk &amp; explore</span>
-          <span className="flex items-center gap-1.5"><Backpack size={15} className="text-amber-neon" /> collect &amp; combine STUFF</span>
-          <span className="flex items-center gap-1.5"><Trophy size={15} className="text-pink-neon" /> score 100 pts of secrets</span>
+          <span className="flex items-center gap-1.5"><Backpack size={15} className="text-amber-neon" /> discover my work</span>
+          <span className="flex items-center gap-1.5"><Trophy size={15} className="text-pink-neon" /> explore at your own pace</span>
           <span className="flex items-center gap-1.5"><Zap size={15} className="text-green-neon" /> live PH day &amp; night sky</span>
         </div>
 
         <button onClick={onInfo} className="mt-7 font-term text-xl text-bone/80 hover:text-cyan-neon underline decoration-dotted underline-offset-4" style={{ textShadow: "1px 1px 0 #000" }}>
-          in a hurry? skip the game — info only →
+          prefer a quick overview? view portfolio →
         </button>
       </div>
 

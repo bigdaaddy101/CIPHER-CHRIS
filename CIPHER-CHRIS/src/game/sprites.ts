@@ -170,42 +170,17 @@ const CHAR_LEGS_SIT = [
   "..........................", // 42 grounded baseline
 ];
 
-// Horizontal lying pose: head on the left pillow, round bare belly in the
-// middle, black shorts and bare legs extending right. 54x20, bottom anchored.
-const CHAR_LAY_ROWS = [
-  "......................................................",
-  "...hhhh...............................................",
-  "..hhhhhh..............................................",
-  "..hsssssh....ssssssssssssssssssss.....................",
-  "..hseessh..ssLLLLLLLLLLLLLLLLLLss.....................",
-  "..hssnnsh.ssLLLLLLLLLLLLLLLLLLLLLss...................",
-  "...sssss..sLLLLLLLLLLLLLLLLLLLLLLLss..................",
-  "....sss...ssLLLLssssssssssssssssSSss..................",
-  "...........ssssssssnnssssssssssSSSss..................",
-  "...........sSSSSSSSSSSSSSSSSSSSSSSSs..................",
-  "............SSSSSSSSSSSSSSSSSSSSSSS...................",
-  "................ssssssssssssssss......................",
-  "...............ssssssssssssss.........................",
-  "....................pppppppppppppppppppppppp..........",
-  "....................wppppppppppppppppppppppppw........",
-  "....................wppppppppppppppppppppppppw........",
-  "....................wwwwwwwwwwwwwwwwwwwwwwwwww........",
-  "....................................ssssssssssssssssss",
-  "....................................ssssssssssssssssss",
-  "....................................SSSSSSSSSSSSSSSSSS",
-];
-
 /* Lynx-point Siamese: cream body, lighter brown points with dark tabby
    stripes, forehead M, striped legs, ringed tail and blue eyes. */
 const CAT_PAL: Record<string, string> = {
-  c: "#3b2418", // dark tabby stripes / ear edges
-  k: "#7a5946", // warm lynx-point base on mask, legs and tail
-  C: "#efe3cc", // cream body
-  B: "#d9c7a8", // cream shadow
-  e: "#38bdf8", // blue Siamese eyes
+  c: "#514f50", // charcoal-grey tabby stripes / ear edges
+  k: "#9a9693", // cool grey lynx-point mask, legs and tail
+  C: "#f1efea", // pale ivory body
+  B: "#d7d2ce", // soft grey-beige body shadow
+  e: "#7db3cc", // pale blue eyes
   E: "#0f172a", // pupil
   n: "#e07a9a", // pink nose
-  w: "#8f8bb5", // whiskers
+  w: "#dedbd8", // pale whiskers
 };
 
 export const SPRITES: Record<string, SpriteDef> = {
@@ -214,86 +189,105 @@ export const SPRITES: Record<string, SpriteDef> = {
   charWalk2: { pal: CHAR_PAL, rows: [...CHAR_HEAD, ...CHAR_TORSO_WALK_B, ...CHAR_LEGS_WALK_B] },
   charBlink: { pal: CHAR_PAL, rows: [...charHeadBlink, ...CHAR_TORSO_IDLE, ...CHAR_LEGS_IDLE] },
   charSit: { pal: CHAR_PAL, rows: [...CHAR_HEAD, ...CHAR_TORSO_IDLE, ...CHAR_LEGS_SIT] },
-  charLay: { pal: CHAR_PAL, rows: CHAR_LAY_ROWS },
 
-  // Lynx-point Siamese sitting: tabby forehead M, striped mask/legs and ringed tail
+  // Pororo: a pale lynx-point cat with pointed ears, a striped mask and tail.
   catSit: {
     pal: CAT_PAL,
     rows: [
-      "..c..........c..",
-      ".ccc........ccc.",
-      ".cckkkkkkkkkkcc.",
-      ".ckkckkkkkkckkc.",
-      ".CCCkkCCCCkkCCC.",
-      ".CCceEkcckEecCC.",
-      "w.CkccnnncckC.w.",
-      "..CCkkkkkkkkCC..",
-      ".CCCCCCCCCCCCCC.",
-      ".CCCCCCCCCCCCCkk",
-      ".CBBBBBBBBBBBBkc",
-      "..kkc..kc..kkc..",
-      "..ckk..kc..ckk..",
+      "......cc......cc........",
+      ".....ckkc....ckkc.......",
+      ".....ckkkc..ckkkc.......",
+      ".....ckkckcckckkc.......",
+      ".....ckckkcckkckc.......",
+      ".....ckkkkCCkkkkc.......",
+      "....CckeEkCCkeEkcC......",
+      "...wCCkkkknnkkkkCCw.....",
+      "....wCCkkCnnCkkCCw......",
+      "......CCkkkkkkCC........",
+      ".......CCCCCCCC.........",
+      "......CCCCCCCCCC....cc..",
+      ".....CCCCCCCCCCCC..ckkc.",
+      ".....CCCCCBBCCCCC.ckkc..",
+      ".....CCCCBBBBCCCCckkc...",
+      "......CkcBBBBckCCkkc....",
+      "......CckBBBBkcCCkc.....",
+      "......CkkCCCCkkCkc......",
+      ".......cc....cccc.......",
     ],
   },
-  // Lynx-point Siamese sleeping: cream loaf, tabby mask and striped tail wrap
   catSleep: {
     pal: CAT_PAL,
     rows: [
-      ".....ccc........",
-      "...cckkkkcc.....",
-      "..ckkkkkkkkc....",
-      ".CCCCCCCCCCCC.kc",
-      ".CCCCCCCCCCCCkcc",
-      ".CBBBBBBBBBBBBkc",
-      "..kckckckckckck.",
+      "........................",
+      ".........CCCCCCCC.......",
+      ".......CCCCCCCCCCCC.....",
+      "......CCCCCCCCCCCCCC....",
+      ".....CCCCCCCCCCCCCCBcc..",
+      "..c..cCCCCCCCCCCCCCkckc.",
+      ".ckcckcCCCCCCCCCCCkckkc.",
+      ".ckckkcCCCBBBBBBCCkkkkc.",
+      ".CkcckCCBBBBBBBBBBCCkc..",
+      "wCkcnkCBBBBBBBBBBCCCC...",
+      ".CCnnCCBBBBBkkkkkkkk....",
+      "..CCCCCBBBBckckckcc.....",
+      "....CCCCCCCCCCCCCC......",
     ],
   },
-  // Lynx-point Siamese walking frame A (right): striped points + ringed tail
-  catWalk1: {
-    pal: CAT_PAL,
-    rows: [
-      ".............c..c.",
-      ".............cccc.",
-      "..........cckCeCc.",
-      "k.........ckCcnCc.",
-      "kc....CCCCCCCCCCc.",
-      ".ck.CCCCCCCCCCCC..",
-      "..kcCCCCCCCCCCC...",
-      "....BBBBBBBBBB....",
-      "....kc..kc..kc....",
-      "...ck...kc...ck...",
-    ],
-  },
-  // Lynx-point Siamese walking frame B (right): alternate leg stripes
-  catWalk2: {
-    pal: CAT_PAL,
-    rows: [
-      ".............c..c.",
-      ".............cccc.",
-      "..........cckCeCc.",
-      ".k........ckCcnCc.",
-      ".kc...CCCCCCCCCCc.",
-      "..ck.CCCCCCCCCCC..",
-      "..kcCCCCCCCCCCC...",
-      "....BBBBBBBBBB....",
-      ".....kc..kc.kc....",
-      ".....ck..kc..ck...",
-    ],
-  },
-  // Lynx-point Siamese standing side view (idle)
   catStand: {
     pal: CAT_PAL,
     rows: [
-      ".............c..c.",
-      ".............cccc.",
-      "..........cckCeCc.",
-      "k.........ckCcnCc.",
-      "kc....CCCCCCCCCCc.",
-      ".ck.CCCCCCCCCCCC..",
-      "..kcCCCCCCCCCCC...",
-      "....BBBBBBBBBB....",
-      "....kc.kc..kc.kc..",
-      "....ck.kc..ck.kc..",
+      ".................c...c..",
+      "................ckc.ckc.",
+      "................ckkckkc.",
+      "................ckckkkc.",
+      ".cc.............CkkeEkC.",
+      ".ckc............CkkkknC.",
+      "..ckc..CCCCCCCCCCkkkCC..",
+      "...ckcCCCCCCCCCCCCCCC...",
+      "....ckCCCCCCCCCCCCCC....",
+      "......CCCCCCCCCCCCCC....",
+      ".......CCBBBBBBBBBBC....",
+      ".......kc.kc...kc.kc....",
+      ".......ck.ck...ck.ck....",
+      ".......cc.cc...cc.cc....",
+    ],
+  },
+  catWalk1: {
+    pal: CAT_PAL,
+    rows: [
+      ".................c...c..",
+      "................ckc.ckc.",
+      "................ckkckkc.",
+      "................ckckkkc.",
+      ".cc.............CkkeEkC.",
+      ".ckc............CkkkknC.",
+      "..ckc..CCCCCCCCCCkkkCC..",
+      "...ckcCCCCCCCCCCCCCCC...",
+      "....ckCCCCCCCCCCCCCC....",
+      "......CCCCCCCCCCCCCC....",
+      ".......CCBBBBBBBBBBC....",
+      ".......kc..kc...kc......",
+      "......ck....ck...ck.....",
+      "......cc....cc...cc.....",
+    ],
+  },
+  catWalk2: {
+    pal: CAT_PAL,
+    rows: [
+      ".................c...c..",
+      "................ckc.ckc.",
+      "................ckkckkc.",
+      "................ckckkkc.",
+      ".cc.............CkkeEkC.",
+      ".ckc............CkkkknC.",
+      "..ckc..CCCCCCCCCCkkkCC..",
+      "...ckcCCCCCCCCCCCCCCC...",
+      "....ckCCCCCCCCCCCCCC....",
+      "......CCCCCCCCCCCCCC....",
+      ".......CCBBBBBBBBBBC....",
+      "........kc.kc...kc......",
+      ".........ck.ck.ck.......",
+      ".........cc.cc.cc.......",
     ],
   },
 

@@ -1,11 +1,21 @@
 import type { Flags, RoomDef, RoomId } from "./types";
+import hallwayRugPortrait from "../assets/photos/hallway-rug-portrait.png";
+import livingRugPortrait from "../assets/photos/living-rug-portrait.png";
 import { drawSprite } from "./sprites";
 import { getPhTime } from "./phTime";
+import { getLiveWeather } from "./weather";
+import { drawWeatherEffects, windDrift } from "./weatherVisuals";
 import type { PhTimeInfo, TimePhase } from "./phTime";
 
 /* ---------------- helpers ---------------- */
 
 type G = CanvasRenderingContext2D;
+
+// Draw the asynchronously loaded portrait in the live layer, not the cached background.
+const hallwayRugImage = new Image();
+hallwayRugImage.src = hallwayRugPortrait;
+const livingRugImage = new Image();
+livingRugImage.src = livingRugPortrait;
 
 function R(g: G, x: number, y: number, w: number, h: number, c: string) {
   g.fillStyle = c;
@@ -209,6 +219,19 @@ function drawPixelCloud(g: G, x: number, y: number, col: string, shade: string) 
   R(g, x, y + 4, 14, 2, shade);
 }
 
+// Cloud cover is live when available; otherwise retain a neutral time-of-day sky.
+function cloudStyle(phase: TimePhase) {
+  const weather = getLiveWeather();
+  const coverage = weather?.cloudCover ?? (phase === "night" ? 0 : 40);
+  const stormy = weather != null && ((weather.code >= 51 && weather.code <= 82) || weather.code >= 95);
+  const dark = stormy || coverage >= 80;
+  const color = dark ? (phase === "night" ? "#55586a" : "#858c99")
+    : phase === "night" ? "#777c9a" : phase === "dawn" ? "#fed7aa" : phase === "dusk" ? "#fbcfe8" : "#ffffff";
+  const shade = dark ? (phase === "night" ? "#393e52" : "#646c7b")
+    : phase === "night" ? "#555a76" : phase === "dawn" ? "#f472b6" : phase === "dusk" ? "#9d174d" : "#dbeafe";
+  return { coverage, color, shade };
+}
+
 function applyRoomDaylight(g: G, phase: TimePhase) {
   const pal = SKY_PALETTES[phase];
   if (pal.roomAlpha <= 0) return;
@@ -252,24 +275,26 @@ function windowDraw(g: G, x: number, y: number, w: number, h: number, seed = 7, 
     const sunY = y + 6;
     R(g, sunX - 1, sunY - 1, 9, 9, "#fef08a");
     R(g, sunX, sunY, 7, 7, "#fbbf24");
-    const cx = x - 12 + ((t * 4.5 + seed * 7) % (w + 20));
-    drawPixelCloud(g, cx, y + Math.floor(h * 0.36), "#ffffff", "#dbeafe");
   } else if (pht.phase === "dawn") {
     // rising sun near horizon + rosy cloud
     const sunX = x + w - 13;
     const sunY = y + h - 18;
     R(g, sunX - 1, sunY - 1, 9, 9, "#fde68a");
     R(g, sunX, sunY, 7, 7, "#f59e0b");
-    const cx = x - 10 + ((t * 3.2 + seed * 5) % (w + 18));
-    drawPixelCloud(g, cx, y + 9, "#fed7aa", "#f472b6");
   } else {
     // Manila Bay sunset sun + violet-pink cloud
     const sunX = x + w - 13;
     const sunY = y + h - 17;
     R(g, sunX - 1, sunY - 1, 9, 9, "#fbbf24");
     R(g, sunX, sunY, 7, 7, "#ef4444");
-    const cx = x - 10 + ((t * 3.5 + seed * 5) % (w + 18));
-    drawPixelCloud(g, cx, y + 8, "#fbcfe8", "#9d174d");
+  }
+
+  // Use the same live cloud cover through the windows and on the rooftop.
+  const clouds = cloudStyle(pht.phase);
+  const cloudCount = clouds.coverage < 10 ? 0 : clouds.coverage < 50 ? 1 : clouds.coverage < 80 ? 2 : 4;
+  for (let i = 0; i < cloudCount; i++) {
+    const cx = x - 14 + (((t * windDrift(getLiveWeather()) + seed * 7 + i * (w + 20) / cloudCount) % (w + 28) + (w + 28)) % (w + 28));
+    drawPixelCloud(g, cx, y + 5 + (i % 3) * 7, clouds.color, clouds.shade);
   }
 
   // city rooftops silhouette / sunlit roofs
@@ -363,8 +388,8 @@ function paintLiving(g: G) {
   R(g, catF.ix + 6, catF.iy + 7, 1, 2, "#3b2418"); // forehead M stripe
   R(g, catF.ix + 3, catF.iy + 4, 2, 2, "#3b2418"); // dark ears
   R(g, catF.ix + 8, catF.iy + 4, 2, 2, "#3b2418");
-  R(g, catF.ix + 4, catF.iy + 8, 1, 1, "#38bdf8"); // blue eyes
-  R(g, catF.ix + 8, catF.iy + 8, 1, 1, "#38bdf8");
+  R(g, catF.ix + 4, catF.iy + 8, 1, 1, "#d9a441"); // amber eyes
+  R(g, catF.ix + 8, catF.iy + 8, 1, 1, "#d9a441");
   R(g, catF.ix + 2, catF.iy + 12, 9, 5, "#00e5ff");
   photoGlare(g, catF.ix, catF.iy);
 
@@ -419,13 +444,6 @@ function paintLiving(g: G) {
   doorDraw(g, 205, "HALL");
   doorDraw(g, 289, "BEDROOM");
 
-  // wide plush area rug
-  R(g, 98, 138, 96, 30, "#3d2b56");
-  R(g, 102, 142, 88, 22, "#463165");
-  g.fillStyle = "#00e5ff";
-  for (let i = 0; i < 6; i++) g.fillRect(110 + i * 14, 151, 4, 4);
-  R(g, 98, 138, 96, 2, "#00e5ff");
-  R(g, 98, 166, 96, 2, "#00e5ff");
 
   // XL 3-cushion deep plush couch (84px wide, reinforced wood legs, thick rolled arms)
   R(g, 108, 123, 5, 4, "#3a2a1e");
@@ -445,16 +463,6 @@ function paintLiving(g: G) {
   R(g, 113, 101, 64, 3, "#6852b5"); // cushion top highlight
   R(g, 106, 118, 78, 5, "#241748"); // solid hardwood base rail
   R(g, 116, 93, 12, 10, "#f471b5"); // big throw pillow
-
-  // sturdy solid-wood coffee table (54px wide, thick slab + chunky legs)
-  R(g, 118, 128, 54, 6, "#66496b");
-  R(g, 118, 128, 54, 2, "#805e87");
-  R(g, 122, 134, 5, 9, "#3a2a3e");
-  R(g, 163, 134, 5, 9, "#3a2a3e");
-  R(g, 127, 123, 6, 5, "#e8e6f7"); // XL mug
-  R(g, 133, 124, 2, 3, "#e8e6f7");
-  R(g, 150, 125, 11, 3, "#14122b"); // chunky TV remote
-  R(g, 152, 124, 2, 2, "#f471b5");
 
   // tall standing floor lamp (60px tall, rises above Cipher Chris's head)
   R(g, 194, 80, 3, 44, "#0f0c20");
@@ -480,12 +488,51 @@ function paintLiving(g: G) {
   drawSprite(g, "plant", 3, 98);
 }
 
+function drawLivingCoffeeTable(g: G) {
+  // sturdy solid-wood coffee table (54px wide, thick slab + chunky legs)
+  R(g, 121, 134, 7, 10, "#57321f"); // dark outlines keep legs visible over the rug
+  R(g, 162, 134, 7, 10, "#57321f");
+  R(g, 123, 134, 4, 9, "#bc7946");
+  R(g, 164, 134, 4, 9, "#bc7946");
+  R(g, 117, 127, 56, 8, "#57321f");
+  R(g, 118, 128, 54, 6, "#c68a52"); // warm oak contrasts with the dark portrait
+  R(g, 118, 128, 54, 2, "#f0c48a");
+  R(g, 120, 133, 50, 1, "#9b5f35");
+  R(g, 127, 123, 6, 5, "#e8e6f7"); // XL mug
+  R(g, 133, 124, 2, 3, "#e8e6f7");
+  R(g, 150, 125, 11, 3, "#14122b"); // chunky TV remote
+  R(g, 152, 124, 2, 2, "#f471b5");
+
+}
+
 function dynLiving(g: G, t: number, f: Flags) {
   const pht = getPhTime();
   // live Philippine sky + animated clouds/stars through living room window
   windowDraw(g, 64, 18, 34, 52, 11, t, pht);
   windowBeamDraw(g, 64, 18, 34, 52, pht);
   applyRoomDaylight(g, pht.phase);
+
+  // A smooth circular portrait rug, drawn on the live layer once the image loads.
+  g.save();
+  g.beginPath();
+  g.arc(146, 151, 27, 0, Math.PI * 2);
+  g.fillStyle = "#3d2b56";
+  g.fill();
+  g.beginPath();
+  g.arc(146, 151, 24, 0, Math.PI * 2);
+  g.fillStyle = "#fbbf24";
+  g.fill();
+  g.clip();
+  if (livingRugImage.complete && livingRugImage.naturalWidth > 0) {
+    g.imageSmoothingEnabled = true;
+    g.imageSmoothingQuality = "high";
+    g.drawImage(livingRugImage, 176, 0, 560, 560, 122, 127, 48, 48);
+  }
+  g.restore();
+
+  // The couch leg and coffee table sit in front of the rug.
+  R(g, 143, 123, 4, 4, "#3a2a1e");
+  drawLivingCoffeeTable(g);
 
   // TV screen (shows live Philippine Standard Time on broadcast test card!)
   const sx = 240, sy = 58, sw = 32, sh = 30;
@@ -509,7 +556,7 @@ function dynLiving(g: G, t: number, f: Flags) {
   // tall lamp glow (softer during bright Philippine daylight)
   if (!f.lampOff) glow(g, 195, 73, 28, "#fbbf24", pht.phase === "day" ? 0.05 : 0.13);
   else R(g, 189, 67, 13, 13, "#6b5a2a");
-  // (Pixel is drawn by the engine — he roams every room from the start and
+  // (Pororo is drawn by the engine — he roams every room from the start and
   //  carries the USB drive with him until he's fed.)
 }
 
@@ -621,9 +668,6 @@ function paintKitchen(g: G) {
   R(g, kf2.ix + 9, kf2.iy + 2, 4, 4, "#fbbf24");
   photoGlare(g, kf2.ix, kf2.iy);
 
-  // sign
-  R(g, 180, 56, 58, 12, "#120e26");
-  txt(g, "EAT SLEEP CODE", 209, 60, "#fbbf24", 1, true);
 
   // heavy cast-iron hanging pans
   R(g, 245, 22, 36, 3, "#57628a");
@@ -704,7 +748,6 @@ function paintBedroom(g: G) {
   R(g, 56, 82, 18, 6, "#d5d1f0");
   R(g, 116, 82, 7, 40, "#3a2a3e"); // solid footboard post
   R(g, 50, 112, 70, 6, "#2a2140"); // heavy bed frame rail
-  txt(g, "Z", 68, 68, "#3b3670", 2);
 
   // wide sturdy nightstand + big warm bedside lamp
   R(g, 124, 92, 20, 28, "#3a2a3e");
@@ -788,8 +831,8 @@ function paintBedroom(g: G) {
   R(g, p1.ix + 3, p1.iy + 3, 5, 5, "#efe3cc"); // cream lynx-point Siamese selfie
   R(g, p1.ix + 3, p1.iy + 5, 5, 3, "#7a5946"); // tabby-striped mask
   R(g, p1.ix + 5, p1.iy + 5, 1, 1, "#3b2418"); // forehead M
-  R(g, p1.ix + 4, p1.iy + 5, 1, 1, "#38bdf8"); // blue eyes
-  R(g, p1.ix + 6, p1.iy + 5, 1, 1, "#38bdf8");
+  R(g, p1.ix + 4, p1.iy + 5, 1, 1, "#d9a441"); // amber eyes
+  R(g, p1.ix + 6, p1.iy + 5, 1, 1, "#d9a441");
 
   const p2 = polaroidDraw(g, 125, 20, 13, 16, "#f471b5");
   R(g, p2.ix, p2.iy, p2.iw, p2.ih, "#0b1936");
@@ -853,11 +896,6 @@ function paintHallway(g: G) {
   base(g, "#171430", "#100e24", "#241c33", "#1c1528");
   R(g, 0, 82, 320, 3, "#2e2a55");
 
-  // wide plush runner rug
-  R(g, 32, 142, 246, 22, "#5c2144");
-  R(g, 36, 146, 238, 14, "#6d2a52");
-  g.fillStyle = "#f471b5";
-  for (let i = 0; i < 9; i++) g.fillRect(48 + i * 26, 151, 4, 4);
 
   doorDraw(g, 8, "LIVING");
 
@@ -872,13 +910,12 @@ function paintHallway(g: G) {
   R(g, 53, 24, 1, 5, "#f43f5e");
   R(g, 49, 26, 5, 1, "#f43f5e");
 
-  // poster
+  // Abstract framed art, without lettering.
   R(g, 67, 18, 30, 38, "#7c2d52");
   R(g, 69, 20, 26, 34, "#943864");
-  txt(g, "KEEP", 82, 24, "#fff", 1, true);
-  txt(g, "CALM", 82, 31, "#fff", 1, true);
-  txt(g, "AND", 82, 38, "#fbbf24", 1, true);
-  txt(g, "COMMIT", 82, 45, "#fff", 1, true);
+  R(g, 74, 26, 16, 16, "#f471b5");
+  R(g, 78, 30, 8, 8, "#fbbf24");
+  R(g, 72, 46, 20, 2, "#d991b4");
 
   doorDraw(g, 105, "BATH");
   // small framed photos above bath door
@@ -906,8 +943,8 @@ function paintHallway(g: G) {
   R(g, hg2.ix + 2, hg2.iy + 3, 5, 5, "#efe3cc"); // cream lynx-point Siamese employee photo
   R(g, hg2.ix + 2, hg2.iy + 5, 5, 3, "#7a5946"); // tabby-striped mask
   R(g, hg2.ix + 4, hg2.iy + 5, 1, 1, "#3b2418"); // forehead M
-  R(g, hg2.ix + 3, hg2.iy + 5, 1, 1, "#38bdf8"); // blue eyes
-  R(g, hg2.ix + 5, hg2.iy + 5, 1, 1, "#38bdf8");
+  R(g, hg2.ix + 3, hg2.iy + 5, 1, 1, "#d9a441"); // amber eyes
+  R(g, hg2.ix + 5, hg2.iy + 5, 1, 1, "#d9a441");
   R(g, hg2.ix + 4, hg2.iy + 9, 1, 3, "#f43f5e");
   photoGlare(g, hg2.ix, hg2.iy);
 
@@ -951,6 +988,24 @@ function paintHallway(g: G) {
 }
 
 function dynHallway(g: G, t: number, f: Flags) {
+  // Large circular portrait rug with a pink border.
+  g.save();
+  g.beginPath();
+  g.arc(160, 151, 27, 0, Math.PI * 2);
+  g.fillStyle = "#5c2144";
+  g.fill();
+  g.beginPath();
+  g.arc(160, 151, 24, 0, Math.PI * 2);
+  g.fillStyle = "#f471b5";
+  g.fill();
+  g.clip();
+  if (hallwayRugImage.complete && hallwayRugImage.naturalWidth > 0) {
+    // Render the portrait smoothly at the canvas's higher backing resolution.
+    g.imageSmoothingEnabled = true;
+    g.imageSmoothingQuality = "high";
+    g.drawImage(hallwayRugImage, 196, 42, 520, 520, 136, 127, 48, 48);
+  }
+  g.restore();
   const pht = getPhTime();
   const pal = SKY_PALETTES[pht.phase];
 
@@ -1050,11 +1105,12 @@ function paintServer(g: G) {
   // whiteboard
   R(g, 218, 24, 52, 48, "#8f8bb5");
   R(g, 220, 26, 48, 44, "#c9cbe8");
-  txt(g, "TODO:", 223, 30, "#1e3a8a");
-  txt(g, "- FIX BUG", 223, 38, "#1e3a8a");
-  txt(g, "- DEPLOY FRI??", 223, 46, "#b91c1c");
-  txt(g, "- BUY COFFEE", 223, 54, "#1e3a8a");
-  txt(g, "- SLEEP LOL", 223, 62, "#0096c7");
+  // A simple diagram rather than a written quote.
+  R(g, 226, 35, 9, 7, "#77a9cc");
+  R(g, 251, 35, 9, 7, "#77a9cc");
+  R(g, 237, 37, 12, 2, "#77a9cc");
+  R(g, 238, 48, 10, 7, "#a095c5");
+  R(g, 242, 42, 2, 6, "#77a9cc");
 
   // wide industrial AC unit
   R(g, 274, 20, 38, 22, "#39406b");
@@ -1174,8 +1230,6 @@ function paintBathroom(g: G) {
   R(g, 136, 32, 40, 44, "#120e26"); // wide mirror right at Cipher Chris's head/chest height!
   R(g, 139, 35, 34, 38, "#35506e");
   R(g, 144, 38, 7, 28, "rgba(255,255,255,0.14)");
-  R(g, 163, 62, 9, 9, "#fbbf24"); // sticky note
-  txt(g, "U R UP", 167, 65, "#92400e", 1, true);
 
   // plush XL bath sheet + hand towel
   R(g, 181, 46, 35, 3, "#8f8bb5");
@@ -1206,7 +1260,8 @@ function paintBathroom(g: G) {
 
   // plush wide bath mat
   R(g, 26, 136, 54, 14, "#164e63");
-  txt(g, "GET NAKED", 53, 141, "#7dd3fc", 1, true);
+  R(g, 30, 139, 46, 1, "#27728a");
+  R(g, 30, 147, 46, 1, "#27728a");
 
   doorDraw(g, 289, "HALL");
 }
@@ -1338,7 +1393,7 @@ function paintGameroom(g: G) {
   R(g, 246, 84, 14, 8, "#14122b");
   R(g, 251, 80, 4, 4, "#f43f5e");
 
-  // posters: space invader + GG
+  // posters: space invader and abstract art
   R(g, 265, 18, 20, 24, "#0a0817");
   const inv = ["#.......#", ".#.....#.", "#########", "##.###.##", "#########", "..##.##..", ".##...##.", "#.#...#.#"];
   g.fillStyle = "#4ade80";
@@ -1346,8 +1401,9 @@ function paintGameroom(g: G) {
     for (let x = 0; x < row.length; x++) if (row[x] === "#") g.fillRect(267 + x * 2, 22 + y * 2, 2, 2);
   });
   R(g, 288, 18, 22, 24, "#7c2d52");
-  txt(g, "GG", 299, 24, "#fff", 1, true);
-  txt(g, "EZ", 299, 32, "#fbbf24", 1, true);
+  R(g, 290, 20, 18, 20, "#943864");
+  R(g, 295, 24, 8, 8, "#fbbf24");
+  R(g, 293, 34, 12, 2, "#f471b5");
 
   // giant XL plush beanbag lounger (50px wide x 28px deep!)
   R(g, 270, 98, 28, 12, "#a84574"); // plush backrest bolster
@@ -1436,13 +1492,6 @@ function drawRooftopWorld(g: G, t: number, pht: PhTimeInfo) {
       const ang = (r / 8) * Math.PI * 2 + ((t * 0.6) % (Math.PI * 2));
       R(g, sunX + Math.cos(ang) * 18 - 1, sunY + Math.sin(ang) * 18 - 1, 2, 2, "#fef9c3");
     }
-    // drifting cumulus pixel clouds across the bright blue sky
-    for (let c = 0; c < 4; c++) {
-      const cx = ((c * 88 + t * (4 + c * 0.8)) % 360) - 24;
-      const cy = 14 + (c % 3) * 15;
-      drawPixelCloud(g, cx, cy, "#ffffff", "#dbeafe");
-      drawPixelCloud(g, cx + 8, cy + 2, "#ffffff", "#bfdbfe");
-    }
     // tiny flapping tropical birds gliding across the skyline
     for (let b = 0; b < 3; b++) {
       const bx = ((b * 96 + t * 14) % 340) - 10;
@@ -1460,10 +1509,6 @@ function drawRooftopWorld(g: G, t: number, pht: PhTimeInfo) {
     g.beginPath();
     g.arc(sunX, sunY, 14, 0, Math.PI * 2);
     g.fill();
-    for (let c = 0; c < 3; c++) {
-      const cx = ((c * 110 + t * 3.5) % 350) - 20;
-      drawPixelCloud(g, cx, 18 + c * 13, "#fed7aa", "#f472b6");
-    }
   } else {
     // famous Manila Bay fiery golden-crimson sunset!
     const sunX = 270, sunY = 46;
@@ -1476,10 +1521,16 @@ function drawRooftopWorld(g: G, t: number, pht: PhTimeInfo) {
     g.beginPath();
     g.arc(sunX, sunY + 3, 12, 0, Math.PI * 2);
     g.fill();
-    for (let c = 0; c < 3; c++) {
-      const cx = ((c * 108 + t * 3.8) % 350) - 20;
-      drawPixelCloud(g, cx, 16 + c * 12, "#fbcfe8", "#9d174d");
-    }
+  }
+
+  // Drifting cloud layers reflect the current cloud-cover percentage.
+  const clouds = cloudStyle(pht.phase);
+  const cloudCount = clouds.coverage < 10 ? 0 : clouds.coverage < 35 ? 3 : clouds.coverage < 65 ? 8 : clouds.coverage < 85 ? 15 : 24;
+  for (let c = 0; c < cloudCount; c++) {
+    const cx = (((c * 47 + t * windDrift(getLiveWeather()) * (0.7 + (c % 3) * 0.15)) % 350 + 350) % 350) - 15;
+    const cy = 7 + (c % 4) * 13;
+    drawPixelCloud(g, cx, cy, clouds.color, clouds.shade);
+    drawPixelCloud(g, cx + 9, cy + 2, clouds.color, clouds.shade);
   }
 
   // 3) Metro Manila skyline buildings (sunlit slate/glass by day, lit windows at dusk/night)
@@ -1574,12 +1625,20 @@ function drawRooftopWorld(g: G, t: number, pht: PhTimeInfo) {
   R(g, 184, 96, 4, 14, "#4a4390");
   drawSprite(g, "dish", 174, 82);
 
-  // wide reinforced rooftop lounge chair + big 50-quart party cooler
-  R(g, 214, 108, 8, 22, "#d6458b");
-  R(g, 219, 124, 34, 6, "#f471b5");
-  R(g, 222, 118, 24, 3, "#8f8bb5");
-  R(g, 221, 130, 4, 10, "#8f8bb5");
-  R(g, 246, 130, 4, 10, "#8f8bb5");
+  // Front-facing lounge chair: the cushion and arms frame the seated sprite.
+  R(g, 216, 104, 32, 25, "#8f8bb5"); // chair frame and back
+  R(g, 218, 106, 28, 22, "#b93478");
+  R(g, 220, 108, 24, 19, "#d6458b"); // upholstered back
+  R(g, 215, 125, 34, 6, "#f471b5"); // seat cushion at hip height
+  R(g, 215, 130, 34, 2, "#a63270");
+  R(g, 213, 117, 5, 13, "#8f8bb5"); // armrests
+  R(g, 246, 117, 5, 13, "#8f8bb5");
+  R(g, 213, 117, 5, 2, "#c8c3df");
+  R(g, 246, 117, 5, 2, "#c8c3df");
+  R(g, 217, 131, 3, 9, "#8f8bb5");
+  R(g, 244, 131, 3, 9, "#8f8bb5");
+
+  // Big 50-quart party cooler
 
   R(g, 257, 118, 25, 19, "#dc2626");
   R(g, 256, 116, 27, 5, "#e8e6f7");
@@ -1596,6 +1655,7 @@ function paintRooftop(g: G) {
 
 function dynRooftop(g: G, t: number) {
   drawRooftopWorld(g, t, getPhTime());
+  drawWeatherEffects(g, getLiveWeather(), t, 320, 180);
 }
 
 /* ============================================================

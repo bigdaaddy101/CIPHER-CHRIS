@@ -5,6 +5,7 @@ import { WALL_PHOTOS } from "../game/wallPhotos";
 import type { WallPhotoDef } from "../game/wallPhotos";
 import { usePhTime, cycleTimeMode } from "../game/phTime";
 import { PixelSprite } from "./PixelSprite";
+import { WeatherBadge } from "./WeatherBadge";
 import { sfx } from "../game/sound";
 
 function SectionTitle({ kicker, title }: { kicker: string; title: string }) {
@@ -73,7 +74,7 @@ export function InfoOnly({ onPlay }: { onPlay: () => void }) {
             {muted ? <VolumeX size={15} /> : <Volume2 size={15} />}
           </button>
           <button onClick={onPlay} className="pix-btn pix-btn-green px-3 py-2.5 text-[9px] flex items-center gap-2">
-            <Play size={12} /> PLAY THE GAME INSTEAD
+            <Play size={12} /> EXPLORE THE WALKTHROUGH
           </button>
         </div>
       </header>
@@ -95,6 +96,7 @@ export function InfoOnly({ onPlay }: { onPlay: () => void }) {
                 <span className="flex items-center gap-1.5"><MapPin size={15} /> {DEV.location}</span>
                 <span className="flex items-center gap-1.5 text-amber-neon"><Clock3 size={15} /> Manila time now: {pht.formatted} ({pht.phaseLabel})</span>
               </p>
+              <div className="mt-2"><WeatherBadge /></div>
               <div className="flex flex-wrap gap-3 mt-6">
                 <a href="#projects" className="pix-btn px-4 py-3 text-[10px] inline-flex items-center gap-2">VIEW PROJECTS <ChevronRight size={12} /></a>
                 <a href="#contact" className="pix-btn pix-btn-pink px-4 py-3 text-[10px] inline-flex items-center gap-2"><Mail size={13} /> GET IN TOUCH</a>
@@ -116,7 +118,7 @@ export function InfoOnly({ onPlay }: { onPlay: () => void }) {
               </div>
             ))}
           </div>
-          <p className="text-dim text-base mt-2">* since the incident.</p>
+          <p className="text-dim text-base mt-2">Portfolio details shown here are placeholders until updated.</p>
         </section>
 
         {/* ABOUT */}

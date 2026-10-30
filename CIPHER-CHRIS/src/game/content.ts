@@ -3,26 +3,25 @@
 export const DEV = {
   handle: "cipher chris",
   name: "CIPHER CHRIS",
-  role: "FULL-STACK DEVELOPER & CREATIVE CODER",
-  tagline: "I build fast, weird, award-hungry things for the web — synced live to Philippine time.",
+  role: "YOUR ROLE HERE",
+  tagline: "Welcome to my interactive portfolio. Take a walk through my space and explore my work.",
   location: "Philippines (PHT · UTC+8)",
-  email: "hello@cipherchris.dev",
-  availability: "OPEN FOR FREELANCE — 2 SLOTS LEFT",
+  email: "your-email@example.com",
+  availability: "AVAILABILITY: TO BE UPDATED",
 };
 
 export const ABOUT = {
   title: "ABOUT.TXT",
   lines: [
-    "Hi, I'm Cipher Chris — a full-stack developer with 8+ years of turning caffeine into production code.",
-    "I specialise in interactive experiences: the kind of websites people screenshot, bookmark and send to their friends at 3 AM.",
-    "By day I ship reliable platforms for startups and studios. By night I build games, generative art and questionable side projects.",
-    "Yes, this entire portfolio is a playable point-and-click adventure. No, I will not be taking questions about my sleep schedule.",
+    "Welcome! I'm Cipher Chris. This walkthrough is a personal portfolio you can explore room by room.",
+    "Add your introduction, background, skills and interests here.",
+    "Meet Pororo, explore the house, and discover more about my work along the way.",
   ],
   stats: [
-    { k: "YEARS ONLINE", v: "08+" },
-    { k: "PROJECTS SHIPPED", v: "63" },
-    { k: "CUPS OF COFFEE", v: "∞" },
-    { k: "BUGS AT 03:47 AM", v: "0*" },
+    { k: "EXPERIENCE", v: "—" },
+    { k: "PROJECTS", v: "—" },
+    { k: "SKILLS", v: "—" },
+    { k: "LOCATION", v: "PH" },
   ],
 };
 
@@ -37,7 +36,7 @@ export interface Project {
   metric: string;
 }
 
-export const PROJECTS: Project[] = [
+const SAMPLE_PROJECTS: Project[] = [
   {
     id: "neon-drift",
     title: "NEON DRIFT",
@@ -100,6 +99,15 @@ export const PROJECTS: Project[] = [
   },
 ];
 
+export const PROJECTS: Project[] = SAMPLE_PROJECTS.map((project, index) => ({
+  ...project,
+  title: `PROJECT ${index + 1} — PLACEHOLDER`,
+  year: "YEAR TBD",
+  desc: "Add a description of your project here.",
+  tags: ["Technology TBD"],
+  metric: "Details to be added",
+}));
+
 export const SECRET_PROJECT = {
   title: "PROJECT: MIDNIGHT",
   desc: "You found the secret build. MIDNIGHT is an unreleased generative-music engine that turns your Git commit history into lo-fi beats. Every merge conflict is a drum fill. Every 3 AM hotfix is a sad piano.",
@@ -113,7 +121,7 @@ export interface Service {
   points: string[];
 }
 
-export const SERVICES: Service[] = [
+const SAMPLE_SERVICES: Service[] = [
   {
     title: "WEB APPS & PLATFORMS",
     price: "from $4k",
@@ -140,57 +148,26 @@ export const SERVICES: Service[] = [
   },
 ];
 
+export const SERVICES: Service[] = SAMPLE_SERVICES.map((service) => ({
+  ...service,
+  price: "TO BE UPDATED",
+  desc: "Add details about this service here.",
+  points: ["Service details to be added"],
+}));
+
 export const SKILLS: { name: string; lvl: number; tag: string }[] = [
-  { name: "TypeScript", lvl: 9, tag: "daily driver" },
-  { name: "React / Next.js", lvl: 10, tag: "weapon of choice" },
-  { name: "Node.js", lvl: 9, tag: "server whisperer" },
-  { name: "PostgreSQL", lvl: 8, tag: "joins for days" },
-  { name: "Three.js / WebGL", lvl: 8, tag: "make it spin" },
-  { name: "Python", lvl: 7, tag: "bot fuel" },
-  { name: "DevOps / Docker", lvl: 7, tag: "it works on my cloud" },
-  { name: "CSS Wizardry", lvl: 9, tag: "yes, even centering divs" },
+  { name: "Your skill here", lvl: 0, tag: "placeholder" },
 ];
 
 export const TESTIMONIALS: { name: string; role: string; score: string; quote: string }[] = [
-  {
-    name: "AAA",
-    role: "CEO, LAUNCHPAD",
-    score: "999900",
-    quote: "Shipped our platform 3 weeks early. Then voluntarily optimised it at 3 AM. Who does that?",
-  },
-  {
-    name: "M4X",
-    role: "HEAD OF PRODUCT, CART-EL",
-    score: "875400",
-    quote: "Our conversion rate jumped 38%. Our CFO framed the graph. Not joking.",
-  },
-  {
-    name: "ZED",
-    role: "FOUNDER, NEON DRIFT",
-    score: "842100",
-    quote: "The only dev I've met who prototypes in pixel art and still hits every deadline.",
-  },
-  {
-    name: "K1M",
-    role: "CTO, DATAFORGE",
-    score: "798650",
-    quote: "Took our spaghetti codebase and turned it into a five-course meal. 10/10, would refactor again.",
-  },
+  { name: "—", role: "PLACEHOLDER", score: "—", quote: "Add a real testimonial here." },
 ];
 
 export const CONTACT = {
-  lines: [
-    "SIGNAL ACQUIRED. The telescope works — and so does my inbox.",
-    "Got a project, a wild idea, or a production server that only breaks at night? Transmit coordinates below.",
-  ],
-  email: "hello@cipherchris.dev",
-  responseTime: "< 24h (usually < 2h, I don't sleep)",
-  socials: [
-    { label: "GITHUB", handle: "@cipherchris", url: "https://github.com" },
-    { label: "TWITTER / X", handle: "@cipher_chris", url: "https://x.com" },
-    { label: "LINKEDIN", handle: "in/cipherchris", url: "https://linkedin.com" },
-    { label: "AWWWARDS", handle: "cipherchris", url: "https://www.awwwards.com" },
-  ],
+  lines: ["Contact details are placeholders and will be updated soon."],
+  email: "your-email@example.com",
+  responseTime: "to be updated",
+  socials: [] as { label: string; handle: string; url: string }[],
 };
 
 /* ---------------- inventory items ---------------- */

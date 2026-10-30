@@ -34,7 +34,7 @@ function rot(key: string, lines: string[]): string {
 }
 
 const me = (text: string): DialogLine => ({ who: "CIPHER CHRIS", color: "#e8e6f7", text });
-const cat = (text: string): DialogLine => ({ who: "PIXEL", color: "#4ade80", text });
+const cat = (text: string): DialogLine => ({ who: "PORORO", color: "#4ade80", text });
 const sys = (text: string): DialogLine => ({ who: "SYSTEM", color: "#22d3ee", text });
 const duck = (text: string): DialogLine => ({ who: "THE DUCK", color: "#fbbf24", text });
 
@@ -55,28 +55,22 @@ export function getIntroLines(): DialogLine[] {
 
   return [
     me(opener),
-    me("Time to upload PROJECT: MIDNIGHT from my USB drive to the server room terminal."),
-    me("Small problem: the USB drive is missing. And I have a furry Siamese suspect carrying the evidence around the house like he owns the place."),
-    sys("QUEST ADDED: UPLOAD PROJECT: MIDNIGHT. Click to walk. Use verbs. Click the PHT clock anytime to preview Day/Night!"),
+    me("Welcome to my portfolio walkthrough! Explore the rooms, meet Pororo, and click on objects to learn more about my work."),
+    sys("Click to walk, use the verbs to interact, or use the menu for a quick look at my portfolio."),
   ];
 }
 
-export function currentObjective(f: Flags, inv: string[]): string {
-  if (f.usbInTerminal) return "MAIN QUEST COMPLETE! Bonus loot: find the ARCADE COIN, brew a TURBO BREW, consult the RUBBER DUCK, visit every room.";
-  if (inv.includes("usb")) return "Take the USB DRIVE to the MAIN TERMINAL in the SERVER ROOM (via the HALLWAY). Use it on the terminal.";
-  if (!f.catFed) return "PIXEL the Siamese is roaming the house WITH your USB DRIVE. Track him down (he wanders room to room) and bribe him — cats accept one currency: snacks. Try the KITCHEN for pizza.";
-  return "Get the USB DRIVE to the SERVER ROOM terminal.";
+export function currentObjective(_f: Flags, _inv: string[]): string {
+  return "Explore the house at your own pace. Visit the desk for projects, the bookshelf for services, and the telescope for contact details.";
 }
 
-export function serverHint(f: Flags, inv: string[]): string | null {
-  if (!f.serverUnlocked && !inv.includes("keycard"))
-    return "The SERVER ROOM needs a KEYCARD. You probably left it somewhere responsible... like a desk drawer in the BEDROOM.";
+export function serverHint(_f: Flags, _inv: string[]): string | null {
   return null;
 }
 
 /* ---------------- doors ---------------- */
 
-function handleDoor(ctx: ScriptCtx, h: Hotspot, verb: Verb, item: string | null): boolean {
+function handleDoor(ctx: ScriptCtx, h: Hotspot, verb: Verb, _item: string | null): boolean {
   if (!h.door) return false;
   const dest = ROOMS[h.door].name;
   if (verb === "look") {
@@ -85,24 +79,6 @@ function handleDoor(ctx: ScriptCtx, h: Hotspot, verb: Verb, item: string | null)
   }
   if (verb === "talk") {
     ctx.say([me("Open sesame. ...Worth a shot. Doors used to respect that.")]);
-    return true;
-  }
-  // server room lock
-  if (h.id === "doorServer" && !ctx.flag("serverUnlocked")) {
-    if (item === "keycard" || ctx.has("keycard")) {
-      sfx.unlock();
-      ctx.setFlag("serverUnlocked");
-      ctx.say(
-        [me("Keycard accepted. Somewhere, a tiny solenoid just had the best day of its life."), sys("SERVER ROOM UNLOCKED.")],
-        () => ctx.gotoRoom("server")
-      );
-    } else {
-      sfx.locked();
-      ctx.say([
-        me("Locked. The keypad wants my SERVER KEYCARD and is being very smug about it."),
-        me("I think I left it in my desk drawer. In the BEDROOM. Probably. Past me is a menace."),
-      ]);
-    }
     return true;
   }
   ctx.gotoRoom(h.door);
@@ -136,7 +112,7 @@ function handleItemOn(ctx: ScriptCtx, h: Hotspot, item: string): boolean {
 
   if (key === "usb->terminal") {
     if (ctx.flag("usbInTerminal")) {
-      ctx.say([me("PROJECT: MIDNIGHT is already uploaded. The terminal is purring like Pixel after pizza.")]);
+      ctx.say([me("PROJECT: MIDNIGHT is already uploaded. The terminal is purring like Pororo after pizza.")]);
       return true;
     }
     sfx.fanfare();
@@ -202,7 +178,7 @@ function handleItemOn(ctx: ScriptCtx, h: Hotspot, item: string): boolean {
   }
   if (key === "brew->cat" || key === "drink->cat" || key === "coffee->cat") {
     sfx.meow();
-    ctx.say([cat("HISS. (Translation: absolutely not, I have a brand to protect.)"), me("Fair. A caffeinated Pixel could end civilisation.")]);
+    ctx.say([cat("HISS. (Translation: absolutely not, I have a brand to protect.)"), me("Fair. A caffeinated Pororo could end civilisation.")]);
     return true;
   }
   return false;
@@ -264,12 +240,12 @@ const H: Record<string, Handler> = {
   cat: {
     look: (c) => c.say([me(c.flag("catFed")
       ? rot("catLook", [
-          "Pixel, my lynx-point Siamese. Cream coat, tabby-striped mask, that little M on his forehead, ringed tail, blue eyes that judge everything.",
+          "Pororo, my lynx-point Siamese. Ivory coat, grey tabby-striped mask, that little M on his forehead, ringed tail, blue eyes that judge everything.",
           "There he goes — striped lynx-point tail up, trotting from room to room doing his rounds. Siamese don't sit still. They supervise.",
-          "Pixel the Siamese, mid-patrol. Those blue eyes have seen every bug I've ever shipped and forgiven none of them.",
+          "Pororo the Siamese, mid-patrol. Those blue eyes have seen every bug I've ever shipped and forgiven none of them.",
         ])
       : rot("catLookGuard", [
-          "Pixel. Lynx-point Siamese. Cream body, brown tabby points, forehead M, striped legs and piercing blue eyes. And yes, that's my USB drive he's taking on patrol.",
+          "Pororo. Lynx-point Siamese. Ivory body, grey tabby points, forehead M, striped legs and piercing blue eyes. And yes, that's my USB drive he's taking on patrol.",
           "There he goes with MY USB drive, doing laps of the house like it's a trophy. Siamese don't steal. They 'relocate'.",
         ]))]),
     talk: (c) => {
@@ -280,7 +256,7 @@ const H: Record<string, Handler> = {
         "...prrt. (Translation: this room is acceptable. I will nap in it later. Carry on.)",
       ]))]);
       else c.say([
-        me("Pixel. Buddy. That's my USB drive you're carrying. It's got my whole secret project on it."),
+        me("Pororo. Buddy. That's my USB drive you're carrying. It's got my whole secret project on it."),
         cat("Mrrrow. (Translation: your offer of NOTHING intrigues me not. Bring snacks. Premium ones. Then we talk.)"),
       ]);
     },
@@ -407,7 +383,7 @@ const H: Record<string, Handler> = {
   bed: {
     look: (c) => c.say([me("My bed. It files a missing-person report about me roughly twice a week. USE to actually lie down on it.")]),
     use: (c) => relax(c, "I kick off nothing — already barefoot — and stretch out horizontally on the mattress. Head on pillow, belly at cruising altitude. Click anywhere or press SPACE to get back up.", {
-      kind: "lay", x: 86, y: 105, face: 1, label: "BED", exitX: 84, exitY: 138,
+      kind: "lay", x: 86, y: 101, face: 1, label: "BED", exitX: 84, exitY: 138,
     }),
   },
   nightstand: {
@@ -471,7 +447,7 @@ const H: Record<string, Handler> = {
     },
   },
   hPoster: {
-    look: (c) => c.say([me("'KEEP CALM AND COMMIT'. Terrible advice. I follow it religiously. git push --force and pray.")]),
+    look: (c) => c.say([me("A framed piece of abstract art brightens up the hallway.")]),
   },
   boxes: {
     look: (c) => c.say([me("Boxes labelled 'OLD GPUS', 'CABLES (FINAL)' and 'CABLES (FINAL) (2)'. A museum of e-waste and good intentions.")]),
@@ -506,10 +482,7 @@ const H: Record<string, Handler> = {
     }),
   },
   whiteboard: {
-    look: (c) => c.say([
-      me("The whiteboard of truth: 'FIX BUG', 'DEPLOY FRI??' in red — the colour of danger — 'BUY COFFEE', and 'SLEEP LOL'."),
-      me("A five-year roadmap, really."),
-    ]),
+    look: (c) => c.say([me("A whiteboard with a simple diagram of the server setup.")]),
   },
   ac: {
     look: (c) => c.say([me("The AC keeps this room at a crisp 18 degrees. Walking in here shirtless at 03:47 AM really wakes up the soul.")]),
@@ -550,7 +523,7 @@ const H: Record<string, Handler> = {
   },
   sinkB: {
     use: (c) => { sfx.splash(); c.say([me("Cold water to the face. +10 alertness, -10 dignity. The drip has been going since March. It's load-bearing now.")]); },
-    look: (c) => c.say([me("Toothbrush, existential dread, one (1) sticky note that says 'U R UP'. Thanks, past me. I am, unfortunately.")]),
+    look: (c) => c.say([me("The bathroom sink and mirror, ready for a fresh start.")]),
   },
   towel: { look: (c) => c.say([me("One purple towel, one pink. A hoopy frood always knows where his towel is. Mine are right here. I'm basically unstoppable.")]) },
   washer: {
@@ -593,7 +566,7 @@ const H: Record<string, Handler> = {
     look: (c) => c.say([me("A CRT and an 8-bit console. The display weighs more than my car and has better colour than my first monitor.")]),
     use: (c) => c.say([me("I blow on the cartridge — the ancient ritual — and it boots first try. Some technologies simply respect tradition.")]),
   },
-  gPosters: { look: (c) => c.say([me("A space invader and a 'GG EZ' poster. Interior design by a man who peaked in the arcade and never emotionally left.")]) },
+  gPosters: { look: (c) => c.say([me("A space invader and a colorful abstract poster brighten up the game room.")]) },
   beanbag: {
     use: (c) => relax(c, "I lower myself into the giant beanbag. It molds around me like a velvet cloud. Click anywhere or press SPACE to attempt the core-strength maneuver required to stand.", {
       kind: "sit", x: 285, y: 139, face: 1, label: "BEANBAG", exitX: 285, exitY: 144,
@@ -650,7 +623,7 @@ const H: Record<string, Handler> = {
   },
   lawnChair: {
     use: (c) => relax(c, "I sit back in the rooftop lounge chair. Sky above, deploy below, cooler within reach. Click anywhere or press SPACE to get up.", {
-      kind: "sit", x: 232, y: 142, face: -1, label: "DECK CHAIR", exitX: 233, exitY: 150,
+      kind: "sit", x: 232, y: 142, face: 1, label: "DECK CHAIR", exitX: 233, exitY: 150,
     }),
     look: (c) => c.say([me("A deck chair in optimistic pink. It has survived three storms and one (1) dropped router.")]),
   },

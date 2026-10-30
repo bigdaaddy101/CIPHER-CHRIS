@@ -129,6 +129,9 @@ export function InfoPanel({
         </div>
 
         <div className="pix-scroll overflow-y-auto p-3.5 sm:p-5 font-term text-lg leading-[1.05] text-bone">
+          {["about", "projects", "services", "skills", "scores", "contact"].includes(panel) && (
+            <p className="mb-3 text-amber-neon">Portfolio details are placeholders until updated.</p>
+          )}
           {panel === "telescope" && <TelescopeView />}
 
           {panel === "photos" && (() => {
@@ -275,7 +278,7 @@ export function InfoPanel({
                   </div>
                 ))}
               </div>
-              <p className="text-dim text-base mt-2">* since the last incident. we don't talk about the incident.</p>
+              <p className="text-dim text-base mt-2">Details will be updated soon.</p>
             </div>
           )}
 
@@ -301,7 +304,7 @@ export function InfoPanel({
                   </div>
                 </article>
               ))}
-              <p className="text-dim text-center">+ 57 more in the full archive. some under NDA. some under pizza boxes.</p>
+              <p className="text-dim text-center">More projects can be added here.</p>
             </div>
           )}
 
