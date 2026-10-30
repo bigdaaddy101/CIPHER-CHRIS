@@ -23,6 +23,7 @@ import {
 import type { ScriptCtx } from "../game/interactions";
 import { InfoPanel } from "./Panels";
 import { PixelSprite } from "./PixelSprite";
+import { WeatherBadge } from "./WeatherBadge";
 
 const VERB_LABEL: Record<Verb, string> = { look: "Look at", use: "Use", talk: "Talk to" };
 
@@ -48,7 +49,7 @@ export function GameScreen({ onInfoOnly, active = true }: { onInfoOnly: () => vo
   const [room, setRoom] = useState<RoomId>("living");
   const [inv, setInv] = useState<string[]>([]);
   const [flags, setFlags] = useState<Flags>({});
-  const [score, setScore] = useState(0);
+  const [, setScore] = useState(0);
   const [dialog, setDialog] = useState<{ lines: DialogLine[]; idx: number } | null>(null);
   const [shown, setShown] = useState(0);
   const [panel, setPanel] = useState<PanelId>(null);
@@ -281,7 +282,7 @@ export function GameScreen({ onInfoOnly, active = true }: { onInfoOnly: () => vo
     return cv;
   };
 
-  /** Live hotspot that follows Pixel around whichever room he's in. */
+  /** Live hotspot that follows Pororo around whichever room he's in. */
   const catHotspot = (): Hotspot | null => {
     const cat = catRef.current;
     if (cat.room !== roomRef.current) return null;
@@ -292,7 +293,7 @@ export function GameScreen({ onInfoOnly, active = true }: { onInfoOnly: () => vo
     const standY = clamp(cat.y + 6, wy0, wy1);
     return {
       id: "cat",
-      name: "PIXEL THE CAT",
+      name: "PORORO THE CAT",
       x: cat.x - w / 2 - 2,
       y: cat.y - h - 2,
       w: w + 4,
@@ -328,6 +329,8 @@ export function GameScreen({ onInfoOnly, active = true }: { onInfoOnly: () => vo
       if (!cv) return;
       const g = cv.getContext("2d");
       if (!g) return;
+      // Keep game coordinates at 320×180 while rendering the portrait at higher resolution.
+      g.setTransform(4, 0, 0, 4, 0, 0);
       g.imageSmoothingEnabled = false;
       const dt = Math.min(0.05, (now - last) / 1000);
       last = now;
@@ -403,13 +406,6 @@ export function GameScreen({ onInfoOnly, active = true }: { onInfoOnly: () => vo
           g.fillStyle = "rgba(0,0,0,0.38)";
           g.fillRect(Math.round(cat.x - 7 * cscale), Math.round(cat.y - 1), Math.round(14 * cscale), 2);
         }
-        // Until he's fed, Pixel is sitting on / carrying the USB drive wherever he roams.
-        if (!flagsRef.current.usbTaken) {
-          g.fillStyle = "#00e5ff";
-          g.fillRect(Math.round(cat.x + (flip ? -8 : 4)), Math.round(cat.y - 2), 4, 2);
-          g.fillStyle = "#c4b5fd";
-          g.fillRect(Math.round(cat.x + (flip ? -8 : 4)), Math.round(cat.y - 2), 1, 1);
-        }
         drawSprite(g, name, cat.x - (cw * cscale) / 2, cat.y - chh * cscale - cbob, flip, cscale);
         if (cat.mood === "nap") {
           const zy = cat.y - chh - 4 - ((t * 6) % 10);
@@ -426,14 +422,28 @@ export function GameScreen({ onInfoOnly, active = true }: { onInfoOnly: () => vo
       const walkFrames = ["charWalk", "charIdle", "charWalk2", "charIdle"] as const;
       const poseKind = poseRef.current.room === roomRef.current ? poseRef.current.kind : "stand";
       const standingSprite = c.moving ? walkFrames[Math.floor(c.phase) % 4] : blink ? "charBlink" : "charIdle";
-      const sprName = poseKind === "lay" ? "charLay" : poseKind === "sit" ? "charSit" : standingSprite;
+      const sprName = poseKind === "lay" ? "charBlink" : poseKind === "sit" ? "charSit" : standingSprite;
       const { w, h } = spriteSize(sprName);
       const bob = poseKind === "stand" && c.moving ? Math.abs(Math.sin(c.phase * Math.PI * 0.5)) * 1.3 : 0;
 
       const drawPlayer = () => {
         if (poseKind === "lay") {
-          // Horizontal 54x20 sprite rests directly on top of the mattress.
-          drawSprite(g, "charLay", c.x - (w * scale) / 2, c.y - h * scale, c.face < 0, scale);
+          // Use the actual closed-eyed character sprite, laid sideways on the bed.
+          // Rotating the original preserves his face, hair, body and outfit.
+          const upright = spriteSize("charBlink");
+          const left = c.x - (upright.h * scale) / 2;
+          const top = c.y - upright.w * scale;
+          g.save();
+          g.translate(Math.round(left), Math.round(c.y));
+          g.rotate(-Math.PI / 2);
+          drawSprite(g, "charBlink", 0, 0, false, scale);
+          g.restore();
+
+          const drift = (t % 3) / 3;
+          g.save();
+          g.globalAlpha = Math.sin(drift * Math.PI) * 0.8;
+          txt(g, "Z", left + 4 + drift * 3, top - 3 - drift * 8, "#c4b5fd");
+          g.restore();
           return;
         }
         g.fillStyle = "rgba(0,0,0,0.44)";
@@ -624,7 +634,7 @@ export function GameScreen({ onInfoOnly, active = true }: { onInfoOnly: () => vo
         showToast("FULLSCREEN IS NOT SUPPORTED BY THIS BROWSER");
       }
     } catch {
-      showToast("FULLSCREEN WAS BLOCKED — THE GAME STILL FILLS THE PAGE");
+      showToast("FULLSCREEN WAS BLOCKED — THE WALKTHROUGH STILL FILLS THE PAGE");
     }
   };
 
@@ -679,7 +689,7 @@ export function GameScreen({ onInfoOnly, active = true }: { onInfoOnly: () => vo
     fadeRef.current = { phase: "in", a: 1 };
     setRoomCard({ name: ROOMS.living.name, sub: ROOMS.living.sub, key: Date.now() });
     const cur = getPhTime();
-    showToast(`GAME RESTARTED — ${cur.formatted} (${cur.phaseLabel})`);
+    showToast(`WALKTHROUGH RESTARTED — ${cur.formatted} (${cur.phaseLabel})`);
     window.setTimeout(() => api.current.say(getIntroLines()), 600);
     sfx.powerup();
   };
@@ -708,8 +718,8 @@ export function GameScreen({ onInfoOnly, active = true }: { onInfoOnly: () => vo
         who: "CIPHER CHRIS",
         color: "#e8e6f7",
         text: catRef.current.room === roomRef.current
-          ? `Last I saw, Pixel was right here in the ${catRoom}. Keep an eye out — he doesn't sit still for long.`
-          : `Last I heard him meow, Pixel was prowling around the ${catRoom}. He wanders, so move quick.`,
+          ? `Last I saw, Pororo was right here in the ${catRoom}. Keep an eye out — he doesn't sit still for long.`
+          : `Last I heard him meow, Pororo was prowling around the ${catRoom}. He wanders, so move quick.`,
       });
     }
     const sh = serverHint(flagsRef.current, invRef.current);
@@ -787,8 +797,9 @@ export function GameScreen({ onInfoOnly, active = true }: { onInfoOnly: () => vo
             {pht.isLive ? "PH LIVE" : pht.phaseLabel}
           </span>
         </button>
-        <div className="hidden sm:block font-pixel text-[8px] sm:text-[9px] text-green-neon" title="Your adventure score">
-          SCORE {String(score).padStart(3, "0")}/100
+        <WeatherBadge />
+        <div className="hidden sm:block font-pixel text-[8px] sm:text-[9px] text-green-neon" title="Rooms explored">
+          ROOMS {visited.length}/8
         </div>
         <div className="flex items-center gap-1.5">
           <button className="pix-btn w-8 h-8 grid place-items-center" onClick={() => void toggleFullscreen()} title="Toggle fullscreen (F)" aria-label="Toggle fullscreen">
@@ -797,10 +808,10 @@ export function GameScreen({ onInfoOnly, active = true }: { onInfoOnly: () => vo
           <button className="pix-btn w-8 h-8 grid place-items-center" onClick={toggleMute} title={muted ? "Unmute (M)" : "Mute (M)"} aria-label="Toggle sound">
             {muted ? <VolumeX size={14} /> : <Volume2 size={14} />}
           </button>
-          <button className="pix-btn w-8 h-8 grid place-items-center" onClick={() => { sfx.uiClick(); setPausedBoth(!paused); }} title="Pause (P / ESC)" aria-label="Pause game">
+          <button className="pix-btn w-8 h-8 grid place-items-center" onClick={() => { sfx.uiClick(); setPausedBoth(!paused); }} title="Pause (P / ESC)" aria-label="Pause walkthrough">
             {paused ? <Play size={14} /> : <Pause size={14} />}
           </button>
-          <button className="pix-btn w-8 h-8 grid place-items-center" onClick={restart} title="Restart game" aria-label="Restart game">
+          <button className="pix-btn w-8 h-8 grid place-items-center" onClick={restart} title="Restart walkthrough" aria-label="Restart walkthrough">
             <RotateCcw size={14} />
           </button>
         </div>
@@ -814,8 +825,8 @@ export function GameScreen({ onInfoOnly, active = true }: { onInfoOnly: () => vo
         <div className="crt relative [container-type:inline-size] w-full h-full bg-abyss overflow-hidden">
           <canvas
             ref={canvasRef}
-            width={VW}
-            height={VH}
+            width={VW * 4}
+            height={VH * 4}
             className="pixelated block w-full h-full cursor-none touch-none"
             onPointerMove={onPointerMove}
             onPointerDown={onPointerDown}
@@ -976,12 +987,12 @@ export function GameScreen({ onInfoOnly, active = true }: { onInfoOnly: () => vo
                   </div>
                 </div>
                 <div className="pix-inset p-3 mt-3">
-                  <p className="font-pixel text-[8px] text-cyan-neon">CURRENT OBJECTIVE</p>
+                  <p className="font-pixel text-[8px] text-cyan-neon">WALKTHROUGH GUIDE</p>
                   <p className="font-term text-lg leading-tight mt-1">{currentObjective(flags, inv)}</p>
                   {serverHint(flags, inv) && <p className="font-term text-lg leading-tight text-dim mt-1">{serverHint(flags, inv)}</p>}
                 </div>
                 <div className="pix-inset p-3 mt-3">
-                  <p className="font-pixel text-[8px] text-cyan-neon">HOUSE MAP — {visited.length}/8 ROOMS · PHOTOS {seenPhotos.length}/{WALL_PHOTOS.length} · SCORE {score}/100</p>
+                  <p className="font-pixel text-[8px] text-cyan-neon">HOUSE MAP — {visited.length}/8 ROOMS · PHOTOS {seenPhotos.length}/{WALL_PHOTOS.length}</p>
                   <div className="grid grid-cols-2 gap-x-3 mt-2">
                     {ROOM_ORDER.map((r) => (
                       <span key={r} className={`font-term text-lg leading-tight flex items-center gap-1.5 ${visited.includes(r) ? "text-bone" : "text-dim/60"}`}>
@@ -995,7 +1006,7 @@ export function GameScreen({ onInfoOnly, active = true }: { onInfoOnly: () => vo
                 <div className="grid gap-2 mt-4">
                   <button className="pix-btn pix-btn-green py-3 text-[10px]" onClick={() => { sfx.uiClick(); setPausedBoth(false); }}>▶ RESUME</button>
                   <button className="pix-btn py-3 text-[10px]" onClick={toggleMute}>{muted ? "SOUND: OFF" : "SOUND: ON"}</button>
-                  <button className="pix-btn py-3 text-[10px]" onClick={restart}>↺ RESTART GAME</button>
+                  <button className="pix-btn py-3 text-[10px]" onClick={restart}>↺ RESTART WALKTHROUGH</button>
                   <button className="pix-btn pix-btn-pink py-3 text-[10px]" onClick={onInfoOnly}>IN A HURRY? INFO ONLY →</button>
                 </div>
                 <p className="font-term text-dim text-base leading-tight mt-4 text-center">

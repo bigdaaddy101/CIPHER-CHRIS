@@ -5,6 +5,9 @@ import { getPhTime, usePhTime } from "../game/phTime";
 import type { PhTimeInfo, TimePhase } from "../game/phTime";
 import { txt } from "../game/rooms";
 import { sfx } from "../game/sound";
+import { getLiveWeather } from "../game/weather";
+import { drawWeatherEffects, windDrift } from "../game/weatherVisuals";
+import { WeatherBadge } from "./WeatherBadge";
 
 const WORLD_W = 640;
 const WORLD_H = 360;
@@ -385,6 +388,10 @@ function drawJeep(g: CanvasRenderingContext2D, x: number, y: number, pht: PhTime
 function drawWorld(g: CanvasRenderingContext2D, t: number, pht: PhTimeInfo, selected: PoiId | null) {
   const pal = SKY[pht.phase];
   const night = pht.phase === "night";
+  const weather = getLiveWeather();
+  const rainy = weather != null && ((weather.code >= 51 && weather.code <= 67) || (weather.code >= 80 && weather.code <= 82) || (weather.code >= 95 && weather.code <= 99));
+  const coverage = weather?.cloudCover ?? (night ? 0 : 40);
+  const overcast = coverage >= 80 || rainy;
   g.imageSmoothingEnabled = false;
   R(g, 0, 0, WORLD_W, 125, pal.top);
   R(g, 0, 125, WORLD_W, 70, pal.mid);
@@ -404,10 +411,15 @@ function drawWorld(g: CanvasRenderingContext2D, t: number, pht: PhTimeInfo, sele
     const sunColor = pht.phase === "dusk" ? "#ef4444" : "#fde047";
     R(g, 548, sunY, 28, 28, sunColor);
     R(g, 543, sunY + 5, 38, 18, sunColor);
-    for (let i = 0; i < 3; i++) {
-      const cx = ((i * 220 + t * (8 + i * 2)) % 760) - 70;
-      drawCloud(g, cx, 25 + i * 27, pht.phase === "day" ? "#ffffff" : "#fbcfe8", pht.phase === "day" ? "#dbeafe" : "#9d174d");
-    }
+  }
+
+  // Cloud cover comes from the same Iligan reading used by the rooftop.
+  const cloudCount = coverage < 10 ? 0 : coverage < 35 ? 2 : coverage < 65 ? 5 : coverage < 85 ? 9 : 16;
+  const cloudColor = overcast ? (night ? "#55586a" : "#858c99") : night ? "#777c9a" : pht.phase === "day" ? "#ffffff" : "#fbcfe8";
+  const cloudShade = overcast ? (night ? "#393e52" : "#646c7b") : night ? "#555a76" : pht.phase === "day" ? "#dbeafe" : "#9d174d";
+  for (let i = 0; i < cloudCount; i++) {
+    const cx = (((i * 97 + t * windDrift(weather) * (1.4 + (i % 3) * 0.2)) % 760 + 760) % 760) - 60;
+    drawCloud(g, cx, 15 + (i % 4) * 26, cloudColor, cloudShade);
   }
 
   // distant skyline and neighborhood homes
@@ -472,6 +484,8 @@ function drawWorld(g: CanvasRenderingContext2D, t: number, pht: PhTimeInfo, sele
   R(g, 225, 244, 3, 31, "#475569");
   R(g, 220, 238, 28, 12, "#155e75");
   txt(g, "SLOW", 234, 241, "#fef3c7", 1, true);
+
+  drawWeatherEffects(g, weather, t, WORLD_W, WORLD_H);
 
   // selected point-of-interest brackets in world space
   if (selected) {
@@ -694,9 +708,14 @@ export function TelescopeView() {
     <div className="space-y-2.5">
       <div className="flex items-center justify-between gap-2 text-base sm:text-lg">
         <span className="inline-flex items-center gap-1.5 text-cyan-neon">
-          <Crosshair size={14} className="text-pink-neon" /> LIVE NEIGHBORHOOD VIEW
+          <Crosshair size={14} className="text-pink-neon" /> ILIGAN NEIGHBORHOOD VIEW
         </span>
         <span className="text-amber-neon whitespace-nowrap">{pht.formatted}</span>
+      </div>
+
+      <div className="text-dim text-base">
+        <WeatherBadge detailed />
+        <span>Illustrated view; the sky-time preview does not change live weather.</span>
       </div>
 
       <div className="relative border-[3px] border-black bg-abyss shadow-[0_0_0_2px_#2e2a55] overflow-hidden">
