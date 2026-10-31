@@ -50,7 +50,7 @@ export function InfoOnly({ onPlay }: { onPlay: () => void }) {
       <header className="sticky top-0 z-30 bg-panel/95 backdrop-blur border-b-[3px] border-black">
         <div className="max-w-5xl mx-auto px-4 py-3 flex items-center gap-3 flex-wrap">
           <span className="font-pixel text-xs text-pink-neon">cipher <span className="text-cyan-neon">chris</span></span>
-          <nav className="hidden md:flex gap-5 mx-auto text-xl text-dim">
+          <nav className="info-nav flex gap-5 mx-auto text-xl text-dim">
             <a href="#about" className="hover:text-bone">ABOUT</a>
             <a href="#services" className="hover:text-bone">SERVICES</a>
             <a href="#projects" className="hover:text-bone">PROJECTS</a>

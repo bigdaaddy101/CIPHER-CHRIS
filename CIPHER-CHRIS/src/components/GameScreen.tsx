@@ -761,24 +761,24 @@ export function GameScreen({ onInfoOnly, active = true }: { onInfoOnly: () => vo
 
   /* =================== RENDER =================== */
   return (
-    <div ref={gameRootRef} className="h-dvh w-full bg-void flex flex-col select-none overflow-hidden">
+    <div ref={gameRootRef} className="walkthrough-shell h-dvh w-full bg-void flex flex-col select-none overflow-hidden">
       {/* ---------- TOP BAR ---------- */}
-      <header className="border-b-[3px] border-black bg-panel px-2 sm:px-4 py-2 flex items-center gap-2 sm:gap-3 flex-wrap z-20 relative">
+      <header className="walkthrough-header border-b-[3px] border-black bg-panel px-2 sm:px-4 py-2 flex items-center gap-2 sm:gap-3 flex-wrap z-20 relative">
         <button onClick={goHome} className="font-pixel text-[10px] sm:text-xs text-pink-neon hover:text-white" title="cipher chris — home">
           cipher <span className="text-cyan-neon">chris</span>
         </button>
-        <nav className="flex items-center gap-1.5 sm:gap-2 mx-auto">
-          <button className="pix-btn px-2 sm:px-3 py-2 text-[8px] sm:text-[9px] flex items-center gap-1.5" onClick={goHome}>
-            <Home size={12} /> HOME
+        <nav className="walkthrough-nav flex items-center gap-1.5 sm:gap-2 mx-auto">
+          <button className="pix-btn px-2 sm:px-3 py-2 text-[8px] sm:text-[9px] flex items-center gap-1.5" onClick={goHome} aria-label="Home">
+            <Home size={12} /> <span className="hidden sm:inline">HOME</span>
           </button>
-          <button className="pix-btn px-2 sm:px-3 py-2 text-[8px] sm:text-[9px] flex items-center gap-1.5" onClick={() => { if (!dialogRef.current) { sfx.uiClick(); setPanelBoth("services"); } }}>
-            <Briefcase size={12} /> SERVICES
+          <button className="pix-btn px-2 sm:px-3 py-2 text-[8px] sm:text-[9px] flex items-center gap-1.5" onClick={() => { if (!dialogRef.current) { sfx.uiClick(); setPanelBoth("services"); } }} aria-label="Services">
+            <Briefcase size={12} /> <span className="hidden sm:inline">SERVICES</span>
           </button>
-          <button className="pix-btn px-2 sm:px-3 py-2 text-[8px] sm:text-[9px] flex items-center gap-1.5" onClick={() => { if (!dialogRef.current) { sfx.shutter(); setPanelBoth("photos"); } }} title="Inspect Wall Photos">
+          <button className="pix-btn px-2 sm:px-3 py-2 text-[8px] sm:text-[9px] flex items-center gap-1.5" onClick={() => { if (!dialogRef.current) { sfx.shutter(); setPanelBoth("photos"); } }} title="Inspect Wall Photos" aria-label="Photos">
             <Camera size={12} /> <span className="hidden sm:inline">PHOTOS</span>
           </button>
-          <button className="pix-btn pix-btn-pink px-2 sm:px-3 py-2 text-[8px] sm:text-[9px] flex items-center gap-1.5" onClick={() => { if (!dialogRef.current) { sfx.uiClick(); setPanelBoth("contact"); } }}>
-            <Mail size={12} /> CONTACT
+          <button className="pix-btn pix-btn-pink px-2 sm:px-3 py-2 text-[8px] sm:text-[9px] flex items-center gap-1.5" onClick={() => { if (!dialogRef.current) { sfx.uiClick(); setPanelBoth("contact"); } }} aria-label="Contact">
+            <Mail size={12} /> <span className="hidden sm:inline">CONTACT</span>
           </button>
         </nav>
         <button
@@ -797,11 +797,11 @@ export function GameScreen({ onInfoOnly, active = true }: { onInfoOnly: () => vo
             {pht.isLive ? "PH LIVE" : pht.phaseLabel}
           </span>
         </button>
-        <WeatherBadge />
+        <div className="walkthrough-weather"><WeatherBadge /></div>
         <div className="hidden sm:block font-pixel text-[8px] sm:text-[9px] text-green-neon" title="Rooms explored">
           ROOMS {visited.length}/8
         </div>
-        <div className="flex items-center gap-1.5">
+        <div className="walkthrough-controls flex items-center gap-1.5">
           <button className="pix-btn w-8 h-8 grid place-items-center" onClick={() => void toggleFullscreen()} title="Toggle fullscreen (F)" aria-label="Toggle fullscreen">
             {isFullscreen ? <Minimize size={14} /> : <Maximize size={14} />}
           </button>
@@ -815,14 +815,14 @@ export function GameScreen({ onInfoOnly, active = true }: { onInfoOnly: () => vo
             <RotateCcw size={14} />
           </button>
         </div>
-        <button onClick={onInfoOnly} className="font-term text-lg text-dim hover:text-cyan-neon underline decoration-dotted underline-offset-4 whitespace-nowrap">
+        <button onClick={onInfoOnly} className="walkthrough-info-link font-term text-lg text-dim hover:text-cyan-neon underline decoration-dotted underline-offset-4 whitespace-nowrap">
           in a hurry? info only →
         </button>
       </header>
 
       {/* ---------- STAGE ---------- */}
-      <main className="flex-1 min-h-0 w-full overflow-hidden">
-        <div className="crt relative [container-type:inline-size] w-full h-full bg-abyss overflow-hidden">
+      <main className="walkthrough-main flex-1 min-h-0 w-full overflow-hidden">
+        <div className="walkthrough-stage crt relative [container-type:inline-size] bg-abyss overflow-hidden">
           <canvas
             ref={canvasRef}
             width={VW * 4}
@@ -879,7 +879,7 @@ export function GameScreen({ onInfoOnly, active = true }: { onInfoOnly: () => vo
           {/* dialog box */}
           {dialog && curLine && (
             <button
-              className="absolute bottom-2 left-1/2 -translate-x-1/2 w-[94%] pix-panel p-3 text-left z-30"
+              className="absolute bottom-2 left-1/2 -translate-x-1/2 w-[94%] max-h-[90%] overflow-y-auto pix-scroll pix-panel p-2 sm:p-3 text-left z-30"
               onClick={(e) => { e.stopPropagation(); advanceDialog(); }}
             >
               <span className="font-pixel text-[8px] sm:text-[9px]" style={{ color: curLine.color }}>{curLine.who}</span>
@@ -896,7 +896,7 @@ export function GameScreen({ onInfoOnly, active = true }: { onInfoOnly: () => vo
 
           {/* inventory: STUFF */}
           {stuffOpen && (
-            <div className="absolute inset-x-0 bottom-0 z-40 p-2">
+            <div className="absolute inset-x-0 bottom-0 z-40 p-2 max-h-full overflow-y-auto pix-scroll">
               <div className="pix-panel popup-in max-w-[620px] mx-auto">
                 <div className="flex items-center gap-2 bg-panel2 px-3 py-2 border-b-2 border-line">
                   <Backpack size={14} className="text-amber-neon" />
@@ -939,6 +939,9 @@ export function GameScreen({ onInfoOnly, active = true }: { onInfoOnly: () => vo
             </div>
           )}
 
+        </div>
+      </main>
+
           {/* info panel */}
           {panel && (
             <InfoPanel
@@ -960,7 +963,7 @@ export function GameScreen({ onInfoOnly, active = true }: { onInfoOnly: () => vo
 
           {/* pause menu */}
           {paused && (
-            <div className="absolute inset-0 z-50 bg-abyss/80 flex items-center justify-center p-3">
+            <div className="fixed inset-0 z-50 bg-abyss/80 flex items-center justify-center p-3">
               <div className="pix-panel popup-in w-full max-w-[440px] p-5 max-h-full overflow-y-auto pix-scroll">
                 <h2 className="font-pixel text-center text-sm text-bone">❚❚ PAUSED</h2>
                 <p className="text-center font-term text-dim text-lg leading-tight mt-1">
@@ -1015,31 +1018,29 @@ export function GameScreen({ onInfoOnly, active = true }: { onInfoOnly: () => vo
               </div>
             </div>
           )}
-        </div>
-      </main>
 
       {/* ---------- BOTTOM HUD (SCUMM BAR) ---------- */}
-      <footer className="border-t-[3px] border-black bg-panel px-2 sm:px-4 py-2 z-20 relative">
+      <footer className="walkthrough-footer border-t-[3px] border-black bg-panel px-2 sm:px-4 py-2 z-20 relative">
         <div className="w-full flex items-center gap-2">
           <div className="flex gap-1.5 shrink-0">
             <button
               className={`pix-btn px-2 sm:px-3 py-2.5 text-[8px] sm:text-[9px] flex items-center gap-1.5 ${activeVerb === "look" ? "is-active" : ""}`}
               onClick={() => { sfx.uiClick(); setVerbBoth(activeVerb === "look" ? null : "look"); }}
-              title="Look at (L)"
+              title="Look at (L)" aria-label="Look at"
             >
               <Eye size={13} /> <span className="hidden sm:inline">LOOK AT</span>
             </button>
             <button
               className={`pix-btn px-2 sm:px-3 py-2.5 text-[8px] sm:text-[9px] flex items-center gap-1.5 ${activeVerb === "use" ? "is-active" : ""}`}
               onClick={() => { sfx.uiClick(); setVerbBoth(activeVerb === "use" ? null : "use"); }}
-              title="Use (U)"
+              title="Use (U)" aria-label="Use"
             >
               <Hand size={13} /> <span className="hidden sm:inline">USE</span>
             </button>
             <button
               className={`pix-btn px-2 sm:px-3 py-2.5 text-[8px] sm:text-[9px] flex items-center gap-1.5 ${activeVerb === "talk" ? "is-active" : ""}`}
               onClick={() => { sfx.uiClick(); setVerbBoth(activeVerb === "talk" ? null : "talk"); }}
-              title="Talk to (T)"
+              title="Talk to (T)" aria-label="Talk to"
             >
               <MessageSquare size={13} /> <span className="hidden sm:inline">TALK TO</span>
             </button>
@@ -1057,9 +1058,9 @@ export function GameScreen({ onInfoOnly, active = true }: { onInfoOnly: () => vo
           <button
             className={`pix-btn px-3 py-2.5 text-[9px] flex items-center gap-1.5 shrink-0 relative ${stuffOpen ? "is-active" : ""}`}
             onClick={() => { if (!dialogRef.current) { sfx.uiClick(); setStuffBoth(!stuffOpen); } }}
-            title="Inventory (I)"
+            title="Inventory (I)" aria-label="Inventory"
           >
-            <Backpack size={14} /> STUFF
+            <Backpack size={14} /> <span className="hidden sm:inline">STUFF</span>
             {inv.length > 0 && (
               <span className="absolute -top-2 -right-2 bg-pink-neon text-abyss font-pixel text-[8px] w-5 h-5 grid place-items-center border-2 border-black">{inv.length}</span>
             )}

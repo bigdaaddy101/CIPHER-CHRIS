@@ -55,7 +55,7 @@ export function TitleScreen({ onStart, onInfo }: { onStart: () => void; onInfo: 
         {/* Live Philippine Time & Sky pill */}
         <button
           onClick={() => { sfx.init(); sfx.uiClick(); cycleTimeMode(); }}
-          className="pix-panel px-3.5 py-1.5 mb-4 inline-flex items-center gap-2 font-term text-lg sm:text-xl text-amber-neon hover:border-amber-neon cursor-pointer"
+          className="pix-panel max-w-full flex-wrap justify-center px-3.5 py-1.5 mb-4 inline-flex items-center gap-2 font-term text-lg sm:text-xl text-amber-neon hover:border-amber-neon cursor-pointer"
           title="Synced live to Philippine Standard Time (Asia/Manila) — click to preview Dawn, Day, Sunset & Night!"
         >
           {pht.phase === "day" && <Sun size={15} className="text-amber-neon" />}
@@ -72,7 +72,7 @@ export function TitleScreen({ onStart, onInfo }: { onStart: () => void; onInfo: 
           CIPHER CHRIS INTERACTIVE PRESENTS
         </p>
 
-        <h1 className="neon-sign text-[28px] sm:text-5xl md:text-6xl mt-5 leading-none whitespace-nowrap">cipher chris</h1>
+        <h1 className="neon-sign text-[clamp(18px,6.5vw,28px)] sm:text-5xl md:text-6xl mt-5 leading-none whitespace-nowrap">cipher chris</h1>
         <p className="font-pixel text-[9px] sm:text-xs text-bone mt-5 leading-relaxed" style={{ textShadow: "2px 2px 0 #000" }}>
           AN INTERACTIVE PORTFOLIO WALKTHROUGH
         </p>
