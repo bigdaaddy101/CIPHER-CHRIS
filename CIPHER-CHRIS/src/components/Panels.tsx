@@ -107,9 +107,9 @@ export function InfoPanel({
   }, [panel, currentIdx]);
 
   return (
-    <div className="absolute inset-0 z-40 flex items-center justify-center p-2 sm:p-4 bg-abyss/75" onClick={onClose}>
+    <div className="fixed inset-0 z-40 flex items-center justify-center p-2 sm:p-4 bg-abyss/75" onClick={onClose}>
       <div
-        className="pix-panel popup-in w-full max-w-[580px] max-h-full flex flex-col"
+        className="pix-panel popup-in w-full max-w-[580px] max-h-full min-h-0 flex flex-col"
         onClick={(e) => e.stopPropagation()}
         role="dialog"
         aria-modal="true"
@@ -128,7 +128,7 @@ export function InfoPanel({
           </button>
         </div>
 
-        <div className="pix-scroll overflow-y-auto p-3.5 sm:p-5 font-term text-lg leading-[1.05] text-bone">
+        <div className="pix-scroll min-h-0 overflow-y-auto p-3.5 sm:p-5 font-term text-lg leading-[1.05] text-bone">
           {["about", "projects", "services", "skills", "scores", "contact"].includes(panel) && (
             <p className="mb-3 text-amber-neon">Portfolio details are placeholders until updated.</p>
           )}

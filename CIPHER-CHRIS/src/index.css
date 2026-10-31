@@ -177,3 +177,43 @@ html, body {
 
 /* title screen skyline blocks */
 @keyframes windowBlink { 0%, 88% { opacity: 1; } 92% { opacity: .1; } 96% { opacity: 1; } }
+
+/* Keep the 320×180 world undistorted, while giving overlays the whole viewport. */
+.walkthrough-main {
+  display: grid;
+  place-items: center;
+  container-type: size;
+}
+.walkthrough-stage {
+  width: min(100cqw, 177.7778cqh);
+  aspect-ratio: 16 / 9;
+  max-width: 100%;
+  max-height: 100%;
+}
+.walkthrough-stage > canvas { width: 100%; height: 100%; }
+
+@media (max-width: 639px) {
+  .walkthrough-header { gap: 6px; padding: 8px; }
+  .walkthrough-nav { margin: 0; gap: 6px; }
+  .walkthrough-nav button { min-width: 34px; min-height: 34px; justify-content: center; }
+  .walkthrough-controls { margin-left: auto; gap: 5px; }
+  .walkthrough-info-link { margin-left: auto; font-size: 16px; }
+  .walkthrough-weather { flex: 1 1 auto; min-width: 0; }
+  .walkthrough-weather > div { font-size: 16px; }
+  .walkthrough-weather > div > div { display: none; }
+  .walkthrough-footer { padding: 8px; }
+  .walkthrough-footer > div { gap: 5px; }
+  .info-nav { order: 10; flex: 1 0 100%; overflow-x: auto; gap: 1rem; white-space: nowrap; padding: 3px 0; }
+}
+
+@media (max-height: 500px) and (orientation: landscape) {
+  .walkthrough-header { padding-block: 4px; gap: 6px; }
+  .walkthrough-header > button:first-child, .walkthrough-weather,
+  .walkthrough-info-link, .walkthrough-header > [title="Rooms explored"] { display: none; }
+  .walkthrough-nav { margin: 0 auto 0 0; }
+  .walkthrough-footer { padding-block: 4px; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation-duration: 0.01ms !important; animation-iteration-count: 1 !important; }
+}
