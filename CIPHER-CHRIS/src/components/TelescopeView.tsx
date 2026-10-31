@@ -715,7 +715,7 @@ export function TelescopeView() {
 
       <div className="text-dim text-base">
         <WeatherBadge detailed />
-        <span>Illustrated view; the sky-time preview does not change live weather.</span>
+        <span>Illustrated view based on live Philippine time and Iligan weather.</span>
       </div>
 
       <div className="relative border-[3px] border-black bg-abyss shadow-[0_0_0_2px_#2e2a55] overflow-hidden">

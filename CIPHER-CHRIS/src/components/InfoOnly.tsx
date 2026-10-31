@@ -3,7 +3,7 @@ import { Play, Mail, Code2, AtSign, Briefcase, Award, Send, ChevronRight, MapPin
 import { ABOUT, CONTACT, DEV, PROJECTS, SERVICES, SKILLS, TESTIMONIALS } from "../game/content";
 import { WALL_PHOTOS } from "../game/wallPhotos";
 import type { WallPhotoDef } from "../game/wallPhotos";
-import { usePhTime, cycleTimeMode } from "../game/phTime";
+import { usePhTime } from "../game/phTime";
 import { PixelSprite } from "./PixelSprite";
 import { WeatherBadge } from "./WeatherBadge";
 import { sfx } from "../game/sound";
@@ -59,17 +59,16 @@ export function InfoOnly({ onPlay }: { onPlay: () => void }) {
             <a href="#words" className="hover:text-bone">KIND WORDS</a>
             <a href="#contact" className="hover:text-bone">CONTACT</a>
           </nav>
-          <button
-            onClick={() => { sfx.init(); sfx.uiClick(); cycleTimeMode(); }}
-            className="pix-inset px-2.5 py-1.5 flex items-center gap-1.5 text-amber-neon text-lg cursor-pointer hover:border-amber-neon ml-auto md:ml-0"
-            title="Live Philippine Standard Time (click to preview Day / Sunset / Night)"
+          <div
+            className="pix-inset px-2.5 py-1.5 flex items-center gap-1.5 text-amber-neon text-lg ml-auto md:ml-0"
+            title="Live Philippine Standard Time (Asia/Manila)"
           >
             {pht.phase === "day" && <Sun size={14} />}
             {pht.phase === "dawn" && <Sunrise size={14} />}
             {pht.phase === "dusk" && <Sunset size={14} />}
             {pht.phase === "night" && <Moon size={14} />}
-            <span>{pht.hh12}:{pht.mm} {pht.ampm} PHT</span>
-          </button>
+            <span>{pht.hh12}:{pht.mm} {pht.ampm} PHT · PH LIVE</span>
+          </div>
           <button onClick={toggleMute} className="pix-btn w-9 h-9 grid place-items-center" aria-label="Toggle sound" title="Toggle chiptune">
             {muted ? <VolumeX size={15} /> : <Volume2 size={15} />}
           </button>

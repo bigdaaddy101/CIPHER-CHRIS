@@ -198,9 +198,6 @@ html, body {
   .walkthrough-nav button { min-width: 34px; min-height: 34px; justify-content: center; }
   .walkthrough-controls { margin-left: auto; gap: 5px; }
   .walkthrough-info-link { margin-left: auto; font-size: 16px; }
-  .walkthrough-weather { flex: 1 1 auto; min-width: 0; }
-  .walkthrough-weather > div { font-size: 16px; }
-  .walkthrough-weather > div > div { display: none; }
   .walkthrough-footer { padding: 8px; }
   .walkthrough-footer > div { gap: 5px; }
   .info-nav { order: 10; flex: 1 0 100%; overflow-x: auto; gap: 1rem; white-space: nowrap; padding: 3px 0; }
@@ -208,7 +205,7 @@ html, body {
 
 @media (max-height: 500px) and (orientation: landscape) {
   .walkthrough-header { padding-block: 4px; gap: 6px; }
-  .walkthrough-header > button:first-child, .walkthrough-weather,
+  .walkthrough-header > button:first-child,
   .walkthrough-info-link, .walkthrough-header > [title="Rooms explored"] { display: none; }
   .walkthrough-nav { margin: 0 auto 0 0; }
   .walkthrough-footer { padding-block: 4px; }

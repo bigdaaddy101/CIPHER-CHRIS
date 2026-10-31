@@ -2,7 +2,7 @@ import { useEffect, useRef } from "react";
 import { Play, Zap, MousePointerClick, Backpack, Trophy, Award, Sun, Moon, Sunrise, Sunset } from "lucide-react";
 import { VW, VH } from "../game/types";
 import { ROOMS } from "../game/rooms";
-import { usePhTime, cycleTimeMode } from "../game/phTime";
+import { usePhTime } from "../game/phTime";
 import { sfx } from "../game/sound";
 import { PixelSprite } from "./PixelSprite";
 import { WeatherBadge } from "./WeatherBadge";
@@ -53,10 +53,9 @@ export function TitleScreen({ onStart, onInfo }: { onStart: () => void; onInfo: 
 
       <div className="relative z-10 flex-1 flex flex-col items-center justify-center text-center px-4 py-10">
         {/* Live Philippine Time & Sky pill */}
-        <button
-          onClick={() => { sfx.init(); sfx.uiClick(); cycleTimeMode(); }}
-          className="pix-panel max-w-full flex-wrap justify-center px-3.5 py-1.5 mb-4 inline-flex items-center gap-2 font-term text-lg sm:text-xl text-amber-neon hover:border-amber-neon cursor-pointer"
-          title="Synced live to Philippine Standard Time (Asia/Manila) — click to preview Dawn, Day, Sunset & Night!"
+        <div
+          className="pix-panel max-w-full flex-wrap justify-center px-3.5 py-1.5 mb-4 inline-flex items-center gap-2 font-term text-lg sm:text-xl text-amber-neon"
+          title="Live Philippine Standard Time (Asia/Manila)"
         >
           {pht.phase === "day" && <Sun size={15} className="text-amber-neon" />}
           {pht.phase === "dawn" && <Sunrise size={15} className="text-pink-neon" />}
@@ -64,9 +63,9 @@ export function TitleScreen({ onStart, onInfo }: { onStart: () => void; onInfo: 
           {pht.phase === "night" && <Moon size={15} className="text-cyan-neon" />}
           <span>PHILIPPINES · {pht.hh12}<span className="pix-blink">:</span>{pht.mm} {pht.ampm} PHT</span>
           <span className="font-pixel text-[7px] bg-violet-neon/25 text-cyan-neon px-1.5 py-0.5 border border-cyan-neon/40">
-            {pht.isLive ? `LIVE · ${pht.phaseLabel}` : `PREVIEW · ${pht.phaseLabel}`}
+            LIVE · {pht.phaseLabel}
           </span>
-        </button>
+        </div>
 
         <p className="font-pixel text-[8px] sm:text-[10px] text-cyan-neon tracking-widest" style={{ textShadow: "2px 2px 0 #000" }}>
           CIPHER CHRIS INTERACTIVE PRESENTS
@@ -96,7 +95,7 @@ export function TitleScreen({ onStart, onInfo }: { onStart: () => void; onInfo: 
           <Play size={16} /> <span className="pix-blink">EXPLORE THE HOUSE</span>
         </button>
         <p className="font-term text-dim text-lg mt-2" style={{ textShadow: "1px 1px 0 #000" }}>
-          sound on for full chiptune glory ♪ · click clock above to test Day / Sunset / Night
+          sound on for full chiptune glory ♪ · synced to Philippine time
         </p>
 
         <div className="flex flex-wrap justify-center gap-x-6 gap-y-2 mt-7 font-term text-lg text-bone/85" style={{ textShadow: "2px 2px 0 #000" }}>
