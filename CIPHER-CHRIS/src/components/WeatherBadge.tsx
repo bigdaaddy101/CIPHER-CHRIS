@@ -8,7 +8,7 @@ export function WeatherBadge({ detailed = false }: { detailed?: boolean }) {
     : "Weather unavailable";
   const observed = weather ? ` · model time ${weather.observedAt.replace("T", " ")} PHT` : "";
   return (
-    <div className="font-term text-lg text-cyan-neon leading-tight" title={`Iligan City weather from Open-Meteo${observed}. Updated every 15 minutes; sky time preview does not change weather.`}>
+    <div className="font-term text-lg text-cyan-neon leading-tight" title={`Iligan City weather from Open-Meteo${observed}. Updated every 15 minutes.`}>
       <span className="inline-flex items-center gap-1.5">
         <CloudSun size={15} aria-hidden="true" />
         <span>ILIGAN · {text}</span>

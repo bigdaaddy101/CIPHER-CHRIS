@@ -11,8 +11,7 @@ import { drawSprite, spriteSize } from "../game/sprites";
 import { ITEMS } from "../game/content";
 import { WALL_PHOTOS } from "../game/wallPhotos";
 import type { WallPhotoId } from "../game/wallPhotos";
-import { usePhTime, cycleTimeMode, setTimeMode, getPhTime } from "../game/phTime";
-import type { TimeMode } from "../game/phTime";
+import { usePhTime, getPhTime } from "../game/phTime";
 import { createCatState, updateCat, catSprite, catAlpha } from "../game/catAI";
 import type { CatState } from "../game/catAI";
 import { sfx } from "../game/sound";
@@ -23,7 +22,7 @@ import {
 import type { ScriptCtx } from "../game/interactions";
 import { InfoPanel } from "./Panels";
 import { PixelSprite } from "./PixelSprite";
-import { WeatherBadge } from "./WeatherBadge";
+import { useIliganWeather } from "../game/weather";
 
 const VERB_LABEL: Record<Verb, string> = { look: "Look at", use: "Use", talk: "Talk to" };
 
@@ -71,6 +70,7 @@ export function GameScreen({ onInfoOnly, active = true }: { onInfoOnly: () => vo
   const [isFullscreen, setIsFullscreen] = useState(false);
   const gameRootRef = useRef<HTMLDivElement>(null);
   const pht = usePhTime();
+  useIliganWeather(); // Keep the illustrated weather live without a navbar report.
 
   /* ---- engine refs ---- */
   const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -694,20 +694,6 @@ export function GameScreen({ onInfoOnly, active = true }: { onInfoOnly: () => vo
     sfx.powerup();
   };
 
-  const handleCycleTime = () => {
-    sfx.uiClick();
-    const next = cycleTimeMode();
-    const info = getPhTime();
-    showToast(next === "live" ? `SYNCED LIVE TO PH: ${info.formatted}` : `SKY PREVIEW: ${info.phaseLabel} (${info.formatted})`);
-  };
-
-  const handlePickTime = (m: TimeMode) => {
-    sfx.uiClick();
-    setTimeMode(m);
-    const info = getPhTime();
-    showToast(m === "live" ? `SYNCED LIVE TO PH: ${info.formatted}` : `SKY PREVIEW: ${info.phaseLabel} (${info.formatted})`);
-  };
-
   const giveHint = () => {
     if (dialogRef.current) return;
     sfx.uiClick();
@@ -781,10 +767,9 @@ export function GameScreen({ onInfoOnly, active = true }: { onInfoOnly: () => vo
             <Mail size={12} /> <span className="hidden sm:inline">CONTACT</span>
           </button>
         </nav>
-        <button
-          onClick={handleCycleTime}
-          className="hidden sm:flex items-center gap-1.5 px-2.5 py-1 pix-inset hover:border-amber-neon font-term text-lg sm:text-xl text-amber-neon text-glow-amber cursor-pointer"
-          title="Live Philippine Standard Time (Asia/Manila) — click to preview Dawn / Day / Sunset / Night!"
+        <div
+          className="hidden sm:flex items-center gap-1.5 px-2.5 py-1 pix-inset font-term text-lg sm:text-xl text-amber-neon text-glow-amber"
+          title="Live Philippine Standard Time (Asia/Manila)"
         >
           {pht.phase === "day" && <Sun size={14} className="text-amber-neon shrink-0" />}
           {pht.phase === "dawn" && <Sunrise size={14} className="text-pink-neon shrink-0" />}
@@ -794,10 +779,9 @@ export function GameScreen({ onInfoOnly, active = true }: { onInfoOnly: () => vo
             {pht.hh12}<span className="pix-blink">:</span>{pht.mm} {pht.ampm}
           </span>
           <span className="text-sm text-cyan-neon font-pixel text-[7px] ml-0.5">
-            {pht.isLive ? "PH LIVE" : pht.phaseLabel}
+            PH LIVE
           </span>
-        </button>
-        <div className="walkthrough-weather"><WeatherBadge /></div>
+        </div>
         <div className="hidden sm:block font-pixel text-[8px] sm:text-[9px] text-green-neon" title="Rooms explored">
           ROOMS {visited.length}/8
         </div>
@@ -969,26 +953,6 @@ export function GameScreen({ onInfoOnly, active = true }: { onInfoOnly: () => vo
                 <p className="text-center font-term text-dim text-lg leading-tight mt-1">
                   Philippine Standard Time · <span className="text-amber-neon">{pht.formatted}</span> ({pht.phaseLabel})
                 </p>
-                <div className="pix-inset p-3 mt-3">
-                  <p className="font-pixel text-[8px] text-cyan-neon">PHILIPPINE DAY &amp; NIGHT CYCLE (ASIA/MANILA)</p>
-                  <div className="grid grid-cols-5 gap-1.5 mt-2">
-                    {([
-                      ["live", "PH LIVE"],
-                      ["dawn", "DAWN"],
-                      ["day", "DAY"],
-                      ["dusk", "SUNSET"],
-                      ["night", "NIGHT"],
-                    ] as const).map(([m, label]) => (
-                      <button
-                        key={m}
-                        onClick={() => handlePickTime(m)}
-                        className={`pix-btn py-2 text-[7px] ${pht.mode === m ? "is-active" : ""}`}
-                      >
-                        {label}
-                      </button>
-                    ))}
-                  </div>
-                </div>
                 <div className="pix-inset p-3 mt-3">
                   <p className="font-pixel text-[8px] text-cyan-neon">WALKTHROUGH GUIDE</p>
                   <p className="font-term text-lg leading-tight mt-1">{currentObjective(flags, inv)}</p>
